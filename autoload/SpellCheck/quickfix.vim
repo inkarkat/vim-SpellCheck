@@ -1,0 +1,90 @@
+" ingospelllist.vim: Show all spelling errors as a quickfix list. 
+"
+" DEPENDENCIES:
+"
+" Copyright: (C) 2011 Ingo Karkat
+"   The VIM LICENSE applies to this script; see ':help copyright'. 
+"
+" Maintainer:	Ingo Karkat <ingo@karkat.de>
+"
+" REVISION	DATE		REMARKS 
+"	001	02-Dec-2011	file creation
+
+function! s:GotoNextLine()
+    if line('.') < line('$')
+	call cursor(line('.') + 1, 1)
+	return 1
+    else
+	return 0
+    endif
+endfunction
+function! s:RetrieveSpellErrors()
+    let l:spellErrorInfo = {}
+    let l:spellErrorList = []
+    call cursor(1,1)
+
+    while 1
+	let [l:spellBadWord, l:errorType] = spellbadword()
+	if empty(l:spellBadWord)
+	    if s:GotoNextLine()
+		continue
+	    else
+		break
+	    endif
+	endif
+
+	if has_key(l:spellErrorInfo, l:spellBadWord)
+	    let l:spellErrorInfo[l:spellBadWord].count += 1
+	else
+	    let l:spellErrorInfo[l:spellBadWord] = {'type': l:errorType, 'lnum': line('.'), 'col': col('.'), 'count': 1}
+	    call add(l:spellErrorList, l:spellBadWord)
+	endif
+
+	let l:colAfterBadWord = col('.') + len(l:spellBadWord)
+	if l:colAfterBadWord < col('$')
+	    call cursor(line('.'), l:colAfterBadWord)
+	elseif ! s:GotoNextLine()
+	    break
+	endif
+    endwhile
+
+    return [l:spellErrorList, l:spellErrorInfo]
+endfunction
+function! s:ToQfEntry( error, bufnr, spellErrorInfo )
+    let l:entry = a:spellErrorInfo
+    let l:entry.bufnr = a:bufnr
+    let l:entry.text = a:error . (l:entry.count > 1 ? ' (' . l:entry.count . ')' : '')
+    let l:entry.type = (l:entry.type ==# 'bad' || l:entry.type ==# 'caps' ? '' : 'W')
+    return l:entry
+endfunction
+function! s:FillQuickfixList( bufnr, spellErrorList, spellErrorInfo )
+    call setqflist(map(a:spellErrorList, 's:ToQfEntry(v:val, a:bufnr, a:spellErrorInfo[v:val])'), ' ')
+    if len(a:spellErrorList) > 0
+	copen
+    endif
+endfunction
+
+function! ingospelllist#List()
+    if ! &l:spell
+	call ingospell#ToggleSpelling(0)
+    endif
+    if ! &l:spell || empty(&l:spelllang)
+	let v:errmsg = 'E756: Spell checking is not enabled'
+	echohl ErrorMsg
+	echomsg v:errmsg
+	echohl None
+
+	return
+    endif
+
+    let l:save_view = winsaveview()
+    let [l:spellErrorList, l:spellErrorInfo] = s:RetrieveSpellErrors()
+    call s:FillQuickfixList(bufnr(''), l:spellErrorList, l:spellErrorInfo)
+    if len(l:spellErrorList) == 0
+	echomsg 'No spell errors found'
+    endif
+
+    call winrestview(l:save_view)
+endfunction
+
+" vim: set ts=8 sts=4 sw=4 noexpandtab ff=unix fdm=syntax :
