@@ -1,4 +1,4 @@
-" SpellCheck.vim: Show all spelling errors as a quickfix list. 
+" SpellCheck/quickfix.vim: Show all spelling errors as a quickfix list. 
 "
 " DEPENDENCIES:
 "
@@ -60,7 +60,7 @@ endfunction
 function! s:FillQuickfixList( bufnr, spellErrorList, spellErrorInfo, isNoJump, isUseLocationList )
     let l:qflist = map(a:spellErrorList, 's:ToQfEntry(v:val, a:bufnr, a:spellErrorInfo[v:val])')
 
-    execute 'doautocmd QuickFixCmdPre' (a:isUseLocationList ? 'lspell' : 'spell') | " Allow hooking into the quickfix update. 
+    silent execute 'doautocmd QuickFixCmdPre' (a:isUseLocationList ? 'lspell' : 'spell') | " Allow hooking into the quickfix update. 
 
     if a:isUseLocationList
 	let l:list = 'l'
@@ -76,10 +76,10 @@ function! s:FillQuickfixList( bufnr, spellErrorList, spellErrorInfo, isNoJump, i
 	endif
     endif
 
-    execute 'doautocmd QuickFixCmdPost' (a:isUseLocationList ? 'lspell' : 'spell') | " Allow hooking into the quickfix update. 
+    silent execute 'doautocmd QuickFixCmdPost' (a:isUseLocationList ? 'lspell' : 'spell') | " Allow hooking into the quickfix update. 
 endfunction
 
-function! SpellCheck#List( isNoJump, isUseLocationList )
+function! SpellCheck#quickfix#List( isNoJump, isUseLocationList )
     if ! &l:spell
 	if ! empty(g:SpellCheck_OnSpellOff)
 	    " Allow hook to enable spelling using some sort of logic. 
@@ -92,7 +92,7 @@ function! SpellCheck#List( isNoJump, isUseLocationList )
 	echomsg v:errmsg
 	echohl None
 
-	return
+	return 2
     endif
 
     let l:save_view = winsaveview()
