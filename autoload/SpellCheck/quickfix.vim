@@ -57,14 +57,29 @@ function! s:ToQfEntry( error, bufnr, spellErrorInfo )
     let l:entry.type = (l:entry.type ==# 'bad' || l:entry.type ==# 'caps' ? '' : 'W')
     return l:entry
 endfunction
-function! s:FillQuickfixList( bufnr, spellErrorList, spellErrorInfo )
-    call setqflist(map(a:spellErrorList, 's:ToQfEntry(v:val, a:bufnr, a:spellErrorInfo[v:val])'), ' ')
-    if len(a:spellErrorList) > 0
-	copen
+function! s:FillQuickfixList( bufnr, spellErrorList, spellErrorInfo, isNoJump, isUseLocationList )
+    let l:qflist = map(a:spellErrorList, 's:ToQfEntry(v:val, a:bufnr, a:spellErrorInfo[v:val])')
+
+    execute 'doautocmd QuickFixCmdPre' (a:isUseLocationList ? 'lspell' : 'spell') | " Allow hooking into the quickfix update. 
+
+    if a:isUseLocationList
+	let l:list = 'l'
+	call setloclist(0, l:qflist, ' ')
+    else
+	let l:list = 'c'
+	call setqflist(l:qflist, ' ')
     endif
+
+    if len(a:spellErrorList) > 0
+	if ! a:isNoJump
+	    execute l:list . 'first'
+	endif
+    endif
+
+    execute 'doautocmd QuickFixCmdPost' (a:isUseLocationList ? 'lspell' : 'spell') | " Allow hooking into the quickfix update. 
 endfunction
 
-function! ingospelllist#List()
+function! ingospelllist#List( isNoJump, isUseLocationList )
     if ! &l:spell
 	call ingospell#ToggleSpelling(0)
     endif
@@ -78,13 +93,15 @@ function! ingospelllist#List()
     endif
 
     let l:save_view = winsaveview()
-    let [l:spellErrorList, l:spellErrorInfo] = s:RetrieveSpellErrors()
-    call s:FillQuickfixList(bufnr(''), l:spellErrorList, l:spellErrorInfo)
+	let [l:spellErrorList, l:spellErrorInfo] = s:RetrieveSpellErrors()
+    call winrestview(l:save_view)
+
+    call s:FillQuickfixList(bufnr(''), l:spellErrorList, l:spellErrorInfo, a:isNoJump, a:isUseLocationList)
     if len(l:spellErrorList) == 0
 	echomsg 'No spell errors found'
     endif
 
-    call winrestview(l:save_view)
+    return (len(l:spellErrorList) > 0)
 endfunction
 
 " vim: set ts=8 sts=4 sw=4 noexpandtab ff=unix fdm=syntax :
