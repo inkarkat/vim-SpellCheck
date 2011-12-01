@@ -32,7 +32,11 @@ endfunction
 function! s:GotoNextSpellError()
     let l:save_wrapscan = &wrapscan
     set wrapscan
-	silent! normal! ]s
+	" XXX: Vim 7.3 does not move to the sole spell error when the cursor is
+	" after the spell error in the same line. Work around this by trying the
+	" other direction, too. 
+	"silent! normal! ]s
+	silent! normal! ]s[s
     let &wrapscan = l:save_wrapscan
 endfunction
 function! SpellCheck#CheckErrors()
