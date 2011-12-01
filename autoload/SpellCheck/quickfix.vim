@@ -1,4 +1,4 @@
-" ingospelllist.vim: Show all spelling errors as a quickfix list. 
+" SpellCheck.vim: Show all spelling errors as a quickfix list. 
 "
 " DEPENDENCIES:
 "
@@ -79,9 +79,12 @@ function! s:FillQuickfixList( bufnr, spellErrorList, spellErrorInfo, isNoJump, i
     execute 'doautocmd QuickFixCmdPost' (a:isUseLocationList ? 'lspell' : 'spell') | " Allow hooking into the quickfix update. 
 endfunction
 
-function! ingospelllist#List( isNoJump, isUseLocationList )
+function! SpellCheck#List( isNoJump, isUseLocationList )
     if ! &l:spell
-	call ingospell#ToggleSpelling(0)
+	if ! empty(g:SpellCheck_OnSpellOff)
+	    " Allow hook to enable spelling using some sort of logic. 
+	    call call(g:SpellCheck_OnSpellOff, [])
+	endif
     endif
     if ! &l:spell || empty(&l:spelllang)
 	let v:errmsg = 'E756: Spell checking is not enabled'
