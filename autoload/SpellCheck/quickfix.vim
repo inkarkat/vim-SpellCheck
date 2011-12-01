@@ -1,6 +1,7 @@
 " SpellCheck/quickfix.vim: Show all spelling errors as a quickfix list. 
 "
 " DEPENDENCIES:
+"   - SpellCheck.vim autoload script. 
 "
 " Copyright: (C) 2011 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'. 
@@ -80,18 +81,7 @@ function! s:FillQuickfixList( bufnr, spellErrorList, spellErrorInfo, isNoJump, i
 endfunction
 
 function! SpellCheck#quickfix#List( isNoJump, isUseLocationList )
-    if ! &l:spell
-	if ! empty(g:SpellCheck_OnSpellOff)
-	    " Allow hook to enable spelling using some sort of logic. 
-	    call call(g:SpellCheck_OnSpellOff, [])
-	endif
-    endif
-    if ! &l:spell || empty(&l:spelllang)
-	let v:errmsg = 'E756: Spell checking is not enabled'
-	echohl ErrorMsg
-	echomsg v:errmsg
-	echohl None
-
+    if ! SpellCheck#CheckEnabledSpelling()
 	return 2
     endif
 
