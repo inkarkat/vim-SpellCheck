@@ -1,8 +1,8 @@
-" SpellCheck.vim: Show all spelling errors as a quickfix list. 
+" SpellCheck.vim: Work with spelling errors. 
 "
 " DEPENDENCIES:
 "   - Requires Vim 7.0 or higher. 
-"   - SpellCheck.vim autoload script. 
+"   - SpellCheck/quickfix.vim autoload script. 
 "
 " Copyright: (C) 2011 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'. 
@@ -34,7 +34,7 @@ endif
 ":SpellLCheck[!]
 "			Same as ":SpellCheck", except the location list for the
 "			current window is used instead of the quickfix list. 
-command! -bar -bang SpellCheck  call SpellCheck#List(<bang>0, 0)
-command! -bar -bang SpellLCheck call SpellCheck#List(<bang>0, 1)
+command! -bar -bang SpellCheck  call SpellCheck#quickfix#List(<bang>0, 0)
+command! -bar -bang SpellLCheck call SpellCheck#quickfix#List(<bang>0, 1)
 
 " vim: set ts=8 sts=4 sw=4 noexpandtab ff=unix fdm=syntax :
