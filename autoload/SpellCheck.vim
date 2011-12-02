@@ -39,7 +39,14 @@ function! s:GotoNextSpellError()
 	silent! normal! ]s[s
     let &wrapscan = l:save_wrapscan
 endfunction
-function! SpellCheck#CheckErrors()
+function! s:GotoFirstMisspelling()
+    let l:save_wrapscan = &wrapscan
+    set nowrapscan
+	silent! normal! gg0]s[s
+    let &wrapscan = l:save_wrapscan
+    normal! zv
+endfunction
+function! SpellCheck#CheckErrors( isNoJump )
     if ! SpellCheck#CheckEnabledSpelling()
 	return 2
     endif
@@ -60,6 +67,10 @@ function! SpellCheck#CheckErrors()
     call winrestview(l:save_view)
 
     if l:isError
+	if ! a:isNoJump
+	    call s:GotoFirstMisspelling()
+	endif
+
 	let v:errmsg = 'There are spelling errors'
 	echohl ErrorMsg
 	echomsg v:errmsg
