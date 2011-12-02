@@ -24,16 +24,25 @@ if ! exists('g:SpellCheck_OnSpellOff')
     let g:SpellCheck_OnSpellOff = ''
 endif
 
+if ! exists('g:SpellCheck_DefineMiscCommands')
+    let g:SpellCheck_DefineMiscCommands = 1
+endif
+
 
 "- commands --------------------------------------------------------------------
 
-":SpellCheck[!]		Show all spelling errors as a quickfix list. 
-"			For multiple occurrences of the same error, the first
-"			location and the number of occurrences is shown. 
-"			If [!] is not given the first error is jumped to. 
-":SpellLCheck[!]
-"			Same as ":SpellCheck", except the location list for the
-"			current window is used instead of the quickfix list. 
+if g:SpellCheck_DefineMiscCommands
+    command! -bar -bang BDeleteUnlessSpellError     if ! SpellCheck#CheckErrors(0)      | bdelete<bang> | endif
+    command! -bar -bang WriteUnlessSpellError       if ! SpellCheck#CheckErrors(0)      | write<bang> | endif
+    command! -bar -bang WriteDeleteUnlessSpellError if ! SpellCheck#CheckErrors(0)      | write<bang> | bdelete<bang> | endif
+    command! -bar -bang XitUnlessSpellError         if ! SpellCheck#CheckErrors(0)      | write<bang> | quit<bang> | endif
+    command! -bar -bang BDeleteOrSpellCheck         if ! SpellCheck#quickfix#List(0, 0) | bdelete<bang> | endif
+    command! -bar -bang WriteOrSpellCheck           if ! SpellCheck#quickfix#List(0, 0) | write<bang> | endif
+    command! -bar -bang WriteDeleteOrSpellCheck     if ! SpellCheck#quickfix#List(0, 0) | write<bang> | bdelete<bang> | endif
+    command! -bar -bang XitOrSpellCheck             if ! SpellCheck#quickfix#List(0, 0) | write<bang> | endif
+    command! -bar -bang UpdateAndSpellCheck         update<bang> | call SpellCheck#quickfix#List(0, 0)
+endif
+
 command! -bar -bang SpellCheck  call SpellCheck#quickfix#List(<bang>0, 0)
 command! -bar -bang SpellLCheck call SpellCheck#quickfix#List(<bang>0, 1)
 
