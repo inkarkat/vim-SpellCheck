@@ -9,6 +9,7 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS 
+"   1.00.001	06-Dec-2011	Publish. 
 "	001	02-Dec-2011	file creation
 
 function! s:GotoNextLine()
@@ -74,6 +75,7 @@ function! s:FillQuickfixList( bufnr, spellErrorList, spellErrorInfo, isNoJump, i
     if len(a:spellErrorList) > 0
 	if ! a:isNoJump
 	    execute l:list . 'first'
+	    normal! zv
 	endif
     endif
 
