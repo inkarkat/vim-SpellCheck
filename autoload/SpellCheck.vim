@@ -8,13 +8,34 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS 
+"	002	03-Dec-2011	New default behavior on &nospell is to just turn
+"				on &spell, and cause an error when no &spelllang
+"				has been set yet. 
 "	001	02-Dec-2011	file creation
+
+function! SpellCheck#AutoEnableSpell()
+    setlocal spell
+    if empty(&l:spelllang)
+	throw 'No spell language defined; use :setl spl=... to enable spell checking'
+    endif
+endfunction
 
 function! SpellCheck#CheckEnabledSpelling()
     if ! &l:spell
-	if ! empty(g:SpellCheck_OnSpellOff)
+	if ! empty(g:SpellCheck_OnNospell)
 	    " Allow hook to enable spelling using some sort of logic. 
-	    call call(g:SpellCheck_OnSpellOff, [])
+	    try
+		call call(g:SpellCheck_OnNospell, [])
+	    catch
+		" v:exception contains what is normally in v:errmsg, but with extra
+		" exception source info prepended, which we cut away. 
+		let v:errmsg = substitute(v:exception, '^Vim\%((\a\+)\)\=:', '', '')
+		echohl ErrorMsg
+		echomsg v:errmsg
+		echohl None
+
+		return 0
+	    endtry
 	endif
     endif
     if ! &l:spell || empty(&l:spelllang)
