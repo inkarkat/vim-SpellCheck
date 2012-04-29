@@ -39,6 +39,12 @@ USAGE							    *SpellCheck-usage*
 			For multiple occurrences of the same error, the first
 			location and the number of occurrences is shown. 
 			If [!] is not given the first error is jumped to. 
+
+			In the quickfix list, spelling errors from other
+			buffers are kept, so you can use something like >
+			    :argdo SpellCheck
+<			to gather the spelling errors from multiple buffers. 
+
 :SpellLCheck[!]		Same as ":SpellCheck", except the location list for the
 			current window is used instead of the quickfix list. 
 
@@ -130,6 +136,10 @@ IDEAS							    *SpellCheck-ideas*
 
 ==============================================================================
 HISTORY							  *SpellCheck-history*
+
+1.01	14-Dec-2011
+ENH: Allow accumulating spelling errors from multiple buffers (e.g. via :argdo
+SpellCheck). 
 
 1.00	06-Dec-2011
 First published version. 
