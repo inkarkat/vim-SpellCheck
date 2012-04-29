@@ -9,7 +9,7 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
-"	001	29-Apr-2012	file creation
+"   1.10.001	29-Apr-2012	file creation
 
 function! SpellCheck#mappings#SpellSuggestWrapper( ... )
     let l:addendum = ''
@@ -75,6 +75,10 @@ function! s:GetCount()
     return s:count
 endfunction
 function! SpellCheck#mappings#MakeMappings()
+    for l:command in ['zg', 'zG', 'zw', 'zW', 'zug', 'zuG', 'zuw', 'zuW']
+	execute printf('nnoremap <silent> <buffer> %s :<C-u>execute "normal! \<lt>CR>"<Bar>call call(g:SpellCheck_OnSpellAdd, [(v:count ? v:count : ""), %s])<Bar>wincmd p<CR>', l:command, string(l:command))
+    endfor
+
     nnoremap <silent> <expr> <SID>(SpellSuggestWrapper) <SID>GetCount() . SpellCheck#mappings#SpellSuggestWrapper('call SpellCheck#mappings#SpellRepeat()', 'wincmd p')
     nnoremap <silent> <script> <buffer> z= :<C-u>call <SID>SetCount()<CR><CR><SID>(SpellSuggestWrapper)
 endfunction
