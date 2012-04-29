@@ -13,6 +13,8 @@
 "				Add indication of spell command's result as a
 "				status message appended to the quickfix list
 "				entry.
+"				Avoid staying in target buffer by temporarily
+"				reducing 'updatetime'.
 "   1.10.001	29-Apr-2012	file creation
 
 function! SpellCheck#mappings#SpellSuggestWrapper( ... )
@@ -32,8 +34,8 @@ function! SpellCheck#mappings#SpellSuggestWrapper( ... )
 	" If no [count] is given, the z= command queries the spell suggestion.
 	" Unfortunately, the querying is disturbed by any following typeahead,
 	" even when submitted via feedkeys(). To work around this, we set up a
-	" temporary autocommand that fires once at the next possible point in
-	" time, then deletes itself.
+	" temporary autocmd that fires once at the next possible point in time,
+	" then deletes itself.
 	if v:count
 	    " No querying, so we can simply append the command to undo the
 	    " temporary enabling of spelling.
@@ -45,10 +47,17 @@ function! SpellCheck#mappings#SpellSuggestWrapper( ... )
 	    " InsertEnter: Editing is started (or resumed from an insert mode
 	    "              <C-O>{cmd}).
 	    " CursorHold: Nothing happened after the {cmd}.
+	    "             ... and reduce the time period by temporarily reducing
+	    "             'updatetime'. Otherwise, the cursor may stay in the
+	    "             target buffer, and suddenly move back to the quickfix
+	    "             window after many seconds, or immediately after the
+	    "             user moves the cursor.
+	    let s:save_updatetime = &updatetime
+	    set updatetime=100
 	    " CursorMoved: The user jumped around in the current buffer.
 	    augroup SpellSuggestOff
 		autocmd!
-		execute 'autocmd BufLeave,WinLeave,InsertEnter,CursorHold,CursorMoved <buffer> execute "autocmd! SpellSuggestOff" | ' . join(l:followUpCommands, '|')
+		execute 'autocmd BufLeave,WinLeave,InsertEnter,CursorHold,CursorMoved <buffer> let &updatetime = s:save_updatetime | execute "autocmd! SpellSuggestOff" | ' . join(l:followUpCommands, '|')
 	    augroup END
 	endif
     endif
@@ -102,10 +111,12 @@ function! SpellCheck#mappings#InsertQuickfixMessage( statusMessage )
 	return
     endif
 
+    let l:save_modified = &l:modified
     let l:save_modifiable = &l:modifiable
     setlocal modifiable
     call setline('.', s:InsertMessage(getline('.'), a:statusMessage))
-    let &l:modifiable = l:save_modifiable
+    let &l:modifiable = l:save_modifiable   " Keep the normally immutable state of the quickfix list.
+    let &l:modified = l:save_modified   " We don't want Vim prompting for saving of the changes, and can't just add 'buftype+=nofile'.
 endfunction
 function! SpellCheck#mappings#OnSpellAdd( command, statusMessage )
     execute "normal! \<CR>"
