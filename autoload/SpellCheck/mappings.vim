@@ -74,9 +74,14 @@ endfunction
 function! s:GetCount()
     return s:count
 endfunction
+function! SpellCheck#mappings#OnSpellAdd( command )
+    execute "normal! \<CR>"
+    let l:isSuccess = call(g:SpellCheck_OnSpellAdd, [(v:count ? v:count : ''), a:command])
+    wincmd p
+endfunction
 function! SpellCheck#mappings#MakeMappings()
     for l:command in ['zg', 'zG', 'zw', 'zW', 'zug', 'zuG', 'zuw', 'zuW']
-	execute printf('nnoremap <silent> <buffer> %s :<C-u>execute "normal! \<lt>CR>"<Bar>call call(g:SpellCheck_OnSpellAdd, [(v:count ? v:count : ""), %s])<Bar>wincmd p<CR>', l:command, string(l:command))
+	execute printf('nnoremap <silent> <buffer> %s :<C-u>call SpellCheck#mappings#OnSpellAdd(%s)<CR>', l:command, string(l:command))
     endfor
 
     nnoremap <silent> <expr> <SID>(SpellSuggestWrapper) <SID>GetCount() . SpellCheck#mappings#SpellSuggestWrapper('call SpellCheck#mappings#SpellRepeat()', 'wincmd p')
