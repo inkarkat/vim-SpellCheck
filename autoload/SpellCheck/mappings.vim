@@ -9,6 +9,10 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.10.002	30-Apr-2012	Add quickfix mappings for word list management.
+"				Add indication of spell command's result as a
+"				status message appended to the quickfix list
+"				entry.
 "   1.10.001	29-Apr-2012	file creation
 
 function! SpellCheck#mappings#SpellSuggestWrapper( ... )
@@ -20,7 +24,7 @@ function! SpellCheck#mappings#SpellSuggestWrapper( ... )
 	    call insert(l:followUpCommands, 'setlocal nospell', 0)
 	else
 	    setlocal nospell    " This might have been set by SpellCheck#CheckEnabledSpelling().
-	    return
+	    return ''
 	endif
     endif
 
@@ -71,8 +75,15 @@ endfunction
 function! s:SetCount()
     let s:count = (v:count ? v:count : '')
 endfunction
-function! s:GetCount()
+function! s:GetCountAndRecordBefore()
+    let s:beforeTick = b:changedtick
     return s:count
+endfunction
+function! s:RecordAfter()
+    let s:afterTick = b:changedtick
+endfunction
+function! s:IsChangeRecorded()
+    return (s:afterTick > s:beforeTick)
 endfunction
 function! s:InsertMessage( entry, statusMessage )
     let l:entry = a:entry
@@ -85,28 +96,39 @@ function! s:InsertMessage( entry, statusMessage )
 
     return l:entry
 endfunction
-function! SpellCheck#mappings#OnSpellAdd( command, statusMessage )
-    execute "normal! \<CR>"
-    let l:isSuccess = call(g:SpellCheck_OnSpellAdd, [(v:count ? v:count : ''), a:command])
-    wincmd p
-
+function! SpellCheck#mappings#InsertQuickfixMessage( statusMessage )
     if &l:buftype !=# 'quickfix'
 	" Oops, the return to the quickfix window went wrong.
 	return
     endif
-    if ! l:isSuccess || empty(a:statusMessage) | return | endif
 
     let l:save_modifiable = &l:modifiable
     setlocal modifiable
     call setline('.', s:InsertMessage(getline('.'), a:statusMessage))
     let &l:modifiable = l:save_modifiable
 endfunction
+function! SpellCheck#mappings#OnSpellAdd( command, statusMessage )
+    execute "normal! \<CR>"
+    let l:isSuccess = call(g:SpellCheck_OnSpellAdd, [(v:count ? v:count : ''), a:command])
+    wincmd p
+
+    if ! l:isSuccess || empty(a:statusMessage) | return | endif
+    call SpellCheck#mappings#InsertQuickfixMessage(a:statusMessage)
+endfunction
 function! SpellCheck#mappings#MakeMappings()
+    " Intercept word list management commands.
+    " The command wrapper itself checks for the success of the wrapped command,
+    " and updates the list entry accordingly.
     for [l:command, l:statusMessage] in [['zg', 'added'], ['zG', 'good'], ['zw', 'added as wrong'], ['zW', 'wrong'], ['zug', 'removed'], ['zuG', 'undo good'], ['zuw', 'removed as wrong'], ['zuW', 'undo wrong']]
 	execute printf('nnoremap <silent> <buffer> %s :<C-u>call SpellCheck#mappings#OnSpellAdd(%s, %s)<CR>', l:command, string(l:command), string(l:statusMessage))
     endfor
 
-    nnoremap <silent> <expr> <SID>(SpellSuggestWrapper) <SID>GetCount() . SpellCheck#mappings#SpellSuggestWrapper('call SpellCheck#mappings#SpellRepeat()', 'wincmd p')
+    " Intercept spell suggestion command.
+    " To find out whether a suggestion was accepted (or the query canceled via
+    " <Esc>), we record b:changetick after moving into the target buffer, then
+    " record again before moving back to the quickfix list, and evaluate and
+    " update the list entry after we're back in the quickfix list.
+    nnoremap <silent> <expr> <SID>(SpellSuggestWrapper) <SID>GetCountAndRecordBefore() . SpellCheck#mappings#SpellSuggestWrapper('call SpellCheck#mappings#SpellRepeat()', 'call <SID>RecordAfter()', 'wincmd p', 'if <SID>IsChangeRecorded()<Bar>call SpellCheck#mappings#InsertQuickfixMessage("corrected")<Bar>endif')
     nnoremap <silent> <script> <buffer> z= :<C-u>call <SID>SetCount()<CR><CR><SID>(SpellSuggestWrapper)
 endfunction
 
