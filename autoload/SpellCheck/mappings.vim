@@ -74,19 +74,29 @@ endfunction
 function! s:GetCount()
     return s:count
 endfunction
-function! SpellCheck#mappings#OnSpellAdd( command )
+function! SpellCheck#mappings#OnSpellAdd( command, statusMessage )
     execute "normal! \<CR>"
     let l:isSuccess = call(g:SpellCheck_OnSpellAdd, [(v:count ? v:count : ''), a:command])
     wincmd p
+
+    if &l:buftype !=# 'quickfix'
+	" Oops, the return to the quickfix window went wrong.
+	return
+    endif
+    if empty(a:statusMessage) | return | endif
+
+    let l:save_modifiable = &l:modifiable
+    setlocal modifiable
+    call setline('.', getline('.') . printf(' [%s]', a:statusMessage))
+    let &l:modifiable = l:save_modifiable
 endfunction
 function! SpellCheck#mappings#MakeMappings()
-    for l:command in ['zg', 'zG', 'zw', 'zW', 'zug', 'zuG', 'zuw', 'zuW']
-	execute printf('nnoremap <silent> <buffer> %s :<C-u>call SpellCheck#mappings#OnSpellAdd(%s)<CR>', l:command, string(l:command))
+    for [l:command, l:statusMessage] in [['zg', 'added'], ['zG', 'good'], ['zw', 'added as wrong'], ['zW', 'wrong'], ['zug', 'removed'], ['zuG', 'undo good'], ['zuw', 'removed as wrong'], ['zuW', 'undo wrong']]
+	execute printf('nnoremap <silent> <buffer> %s :<C-u>call SpellCheck#mappings#OnSpellAdd(%s, %s)<CR>', l:command, string(l:command), string(l:statusMessage))
     endfor
 
     nnoremap <silent> <expr> <SID>(SpellSuggestWrapper) <SID>GetCount() . SpellCheck#mappings#SpellSuggestWrapper('call SpellCheck#mappings#SpellRepeat()', 'wincmd p')
     nnoremap <silent> <script> <buffer> z= :<C-u>call <SID>SetCount()<CR><CR><SID>(SpellSuggestWrapper)
 endfunction
-
 
 " vim: set ts=8 sts=4 sw=4 noexpandtab ff=unix fdm=syntax :
