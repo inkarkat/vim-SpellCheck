@@ -1,0 +1,4 @@
+autoload/SpellCheck.vim
+autoload/SpellCheck/quickfix.vim
+plugin/SpellCheck.vim
+doc/SpellCheck.txt
