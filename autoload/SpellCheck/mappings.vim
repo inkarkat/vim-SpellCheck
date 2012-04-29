@@ -74,6 +74,17 @@ endfunction
 function! s:GetCount()
     return s:count
 endfunction
+function! s:InsertMessage( entry, statusMessage )
+    let l:entry = a:entry
+    if a:statusMessage =~# '\<undo '
+	let l:entry = substitute(l:entry, '\C\V' . printf(' [%s]\$', escape(substitute(a:statusMessage, 'undo ', '', ''), '\')), '', '')
+    endif
+    if l:entry ==# a:entry
+	let l:entry .= printf(' [%s]', a:statusMessage)
+    endif
+
+    return l:entry
+endfunction
 function! SpellCheck#mappings#OnSpellAdd( command, statusMessage )
     execute "normal! \<CR>"
     let l:isSuccess = call(g:SpellCheck_OnSpellAdd, [(v:count ? v:count : ''), a:command])
@@ -83,11 +94,11 @@ function! SpellCheck#mappings#OnSpellAdd( command, statusMessage )
 	" Oops, the return to the quickfix window went wrong.
 	return
     endif
-    if empty(a:statusMessage) | return | endif
+    if ! l:isSuccess || empty(a:statusMessage) | return | endif
 
     let l:save_modifiable = &l:modifiable
     setlocal modifiable
-    call setline('.', getline('.') . printf(' [%s]', a:statusMessage))
+    call setline('.', s:InsertMessage(getline('.'), a:statusMessage))
     let &l:modifiable = l:save_modifiable
 endfunction
 function! SpellCheck#mappings#MakeMappings()
