@@ -9,6 +9,8 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS 
+"   1.01.002	06-Dec-2011	ENH: Allow accumulating spelling errors from
+"				multiple buffers (e.g. via :argdo SpellCheck). 
 "   1.00.001	06-Dec-2011	Publish. 
 "	001	02-Dec-2011	file creation
 
@@ -69,7 +71,21 @@ function! s:FillQuickfixList( bufnr, spellErrorList, spellErrorInfo, isNoJump, i
 	call setloclist(0, l:qflist, ' ')
     else
 	let l:list = 'c'
-	call setqflist(l:qflist, ' ')
+	
+	let l:errorsFromOtherBuffers = filter(getqflist(), 'v:val.bufnr != a:bufnr')
+	if empty(l:errorsFromOtherBuffers)
+	    " We haven't accumulated spelling errors from multiple buffers, just
+	    " replace the entire quickfix list. 
+	    call setqflist(l:qflist, ' ')
+	else
+	    " To allow accumulating spelling errors from multiple buffers (e.g.
+	    " via :argdo SpellCheck), just remove the previous errors for the
+	    " current buffer, and append the new list. 
+	    call setqflist(l:errorsFromOtherBuffers + l:qflist, 'r')
+
+	    " Jump to the first updated spelling error of the current buffer. 
+	    let l:list = (len(l:errorsFromOtherBuffers) + 1) . 'c'
+	endif
     endif
 
     if len(a:spellErrorList) > 0
