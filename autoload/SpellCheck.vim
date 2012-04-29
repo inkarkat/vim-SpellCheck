@@ -8,6 +8,7 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS 
+"   1.00.002	06-Dec-2011	Publish. 
 "	002	03-Dec-2011	New default behavior on &nospell is to just turn
 "				on &spell, and cause an error when no &spelllang
 "				has been set yet. 
