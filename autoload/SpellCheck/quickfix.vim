@@ -1,17 +1,17 @@
-" SpellCheck/quickfix.vim: Show all spelling errors as a quickfix list. 
+" SpellCheck/quickfix.vim: Show all spelling errors as a quickfix list.
 "
 " DEPENDENCIES:
-"   - SpellCheck.vim autoload script. 
+"   - SpellCheck.vim autoload script.
 "
 " Copyright: (C) 2011 Ingo Karkat
-"   The VIM LICENSE applies to this script; see ':help copyright'. 
+"   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
-" REVISION	DATE		REMARKS 
+" REVISION	DATE		REMARKS
 "   1.01.002	06-Dec-2011	ENH: Allow accumulating spelling errors from
-"				multiple buffers (e.g. via :argdo SpellCheck). 
-"   1.00.001	06-Dec-2011	Publish. 
+"				multiple buffers (e.g. via :argdo SpellCheck).
+"   1.00.001	06-Dec-2011	Publish.
 "	001	02-Dec-2011	file creation
 
 function! s:GotoNextLine()
@@ -64,26 +64,26 @@ endfunction
 function! s:FillQuickfixList( bufnr, spellErrorList, spellErrorInfo, isNoJump, isUseLocationList )
     let l:qflist = map(a:spellErrorList, 's:ToQfEntry(v:val, a:bufnr, a:spellErrorInfo[v:val])')
 
-    silent execute 'doautocmd QuickFixCmdPre' (a:isUseLocationList ? 'lspell' : 'spell') | " Allow hooking into the quickfix update. 
+    silent execute 'doautocmd QuickFixCmdPre' (a:isUseLocationList ? 'lspell' : 'spell') | " Allow hooking into the quickfix update.
 
     if a:isUseLocationList
 	let l:list = 'l'
 	call setloclist(0, l:qflist, ' ')
     else
 	let l:list = 'c'
-	
+
 	let l:errorsFromOtherBuffers = filter(getqflist(), 'v:val.bufnr != a:bufnr')
 	if empty(l:errorsFromOtherBuffers)
 	    " We haven't accumulated spelling errors from multiple buffers, just
-	    " replace the entire quickfix list. 
+	    " replace the entire quickfix list.
 	    call setqflist(l:qflist, ' ')
 	else
 	    " To allow accumulating spelling errors from multiple buffers (e.g.
 	    " via :argdo SpellCheck), just remove the previous errors for the
-	    " current buffer, and append the new list. 
+	    " current buffer, and append the new list.
 	    call setqflist(l:errorsFromOtherBuffers + l:qflist, 'r')
 
-	    " Jump to the first updated spelling error of the current buffer. 
+	    " Jump to the first updated spelling error of the current buffer.
 	    let l:list = (len(l:errorsFromOtherBuffers) + 1) . 'c'
 	endif
     endif
@@ -95,7 +95,7 @@ function! s:FillQuickfixList( bufnr, spellErrorList, spellErrorInfo, isNoJump, i
 	endif
     endif
 
-    silent execute 'doautocmd QuickFixCmdPost' (a:isUseLocationList ? 'lspell' : 'spell') | " Allow hooking into the quickfix update. 
+    silent execute 'doautocmd QuickFixCmdPost' (a:isUseLocationList ? 'lspell' : 'spell') | " Allow hooking into the quickfix update.
 endfunction
 
 function! SpellCheck#quickfix#List( isNoJump, isUseLocationList )
