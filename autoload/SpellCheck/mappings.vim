@@ -2,6 +2,7 @@
 "
 " DEPENDENCIES:
 "   - SpellCheck.vim autoload script
+"   - ingocollections.vim autoload script
 "
 " Copyright: (C) 2012 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
@@ -9,6 +10,8 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.11.003	30-Apr-2012	ENH: Capture corrected text and include in
+"				quickfix status message.
 "   1.10.002	30-Apr-2012	Add quickfix mappings for word list management.
 "				Add indication of spell command's result as a
 "				status message appended to the quickfix list
@@ -86,10 +89,12 @@ function! s:SetCount()
 endfunction
 function! s:GetCountAndRecordBefore()
     let s:beforeTick = b:changedtick
+    let s:beforeLineContent = getline('.')
     return s:count
 endfunction
 function! s:RecordAfter()
     let s:afterTick = b:changedtick
+    let s:afterLineContent = getline('.')
 endfunction
 function! s:IsChangeRecorded()
     return (s:afterTick > s:beforeTick)
@@ -105,7 +110,7 @@ function! s:InsertMessage( entry, statusMessage )
 
     return l:entry
 endfunction
-function! SpellCheck#mappings#InsertQuickfixMessage( statusMessage )
+function! s:QuickfixInsertMessage( statusMessage )
     if &l:buftype !=# 'quickfix'
 	" Oops, the return to the quickfix window went wrong.
 	return
@@ -124,7 +129,33 @@ function! SpellCheck#mappings#OnSpellAdd( command, statusMessage )
     wincmd p
 
     if ! l:isSuccess || empty(a:statusMessage) | return | endif
-    call SpellCheck#mappings#InsertQuickfixMessage(a:statusMessage)
+    call s:QuickfixInsertMessage(a:statusMessage)
+endfunction
+function! s:GetCorrectedText()
+    " XXX: Unfortunately, Vim doesn't set the change marks `[ `] on z=, so we
+    " have to split the line where the correction occurred manually into words
+    " and cut away identical words from the front and end until we've narrowed
+    " it down to the change.
+    let l:beforeWords = ingocollections#SplitKeepSeparators(s:beforeLineContent, '\k\@!.')
+    unlet s:beforeLineContent   " May be huge; free it.
+    let l:afterWords = ingocollections#SplitKeepSeparators(s:afterLineContent, '\k\@!.')
+    unlet s:afterLineContent    " May be huge; free it.
+
+    let l:startIdx = 0
+    while get(l:beforeWords, l:startIdx, '') ==# get(l:afterWords, l:startIdx, '')
+	let l:startIdx += 1
+    endwhile
+    let l:endIdx = 0
+    while get(l:beforeWords, -1 * l:endIdx, '') ==# get(l:afterWords, -1 * l:endIdx, '')
+	let l:endIdx += 1
+    endwhile
+
+    return join(l:afterWords[l:startIdx : (-1 * l:endIdx)], '')
+endfunction
+function! s:QuickfixInsertCorrectionMessage()
+    let l:changedText = s:GetCorrectedText()
+
+    call s:QuickfixInsertMessage('corrected' . (empty(l:changedText) ? '' : ': ' . l:changedText))
 endfunction
 function! SpellCheck#mappings#MakeMappings()
     " Intercept word list management commands.
@@ -139,7 +170,7 @@ function! SpellCheck#mappings#MakeMappings()
     " <Esc>), we record b:changetick after moving into the target buffer, then
     " record again before moving back to the quickfix list, and evaluate and
     " update the list entry after we're back in the quickfix list.
-    nnoremap <silent> <expr> <SID>(SpellSuggestWrapper) <SID>GetCountAndRecordBefore() . SpellCheck#mappings#SpellSuggestWrapper('call SpellCheck#mappings#SpellRepeat()', 'call <SID>RecordAfter()', 'wincmd p', 'if <SID>IsChangeRecorded()<Bar>call SpellCheck#mappings#InsertQuickfixMessage("corrected")<Bar>endif')
+    nnoremap <silent> <expr> <SID>(SpellSuggestWrapper) <SID>GetCountAndRecordBefore() . SpellCheck#mappings#SpellSuggestWrapper('call <SID>RecordAfter()', 'call SpellCheck#mappings#SpellRepeat()', 'wincmd p', 'if <SID>IsChangeRecorded()<Bar>call <SID>QuickfixInsertCorrectionMessage()<Bar>endif')
     nnoremap <silent> <script> <buffer> z= :<C-u>call <SID>SetCount()<CR><CR><SID>(SpellSuggestWrapper)
 endfunction
 
