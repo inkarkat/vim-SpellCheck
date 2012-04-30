@@ -1,5 +1,5 @@
-*SpellCheck.txt*        Work with spelling errors. 
-		        
+*SpellCheck.txt*        Work with spelling errors.
+
 			SPELL CHECK    by Ingo Karkat
 							      *SpellCheck.vim*
 description			|SpellCheck-description|
@@ -18,11 +18,14 @@ DESCRIPTION					      *SpellCheck-description*
 Vim offers built-in spell checking; when you enable it via 'spell' and
 'spelllang', you can jump to the highlighted spelling errors in the buffer via
 |]s|. With spelling errors scattered across a large document, Vim does not
-provide an overview or report about the overall spell situation. 
+provide an overview or report about the overall spell situation.
 
 This plugin populates the |quickfix|-list with all spelling errors found in a
 buffer to give you that overview. You can use the built-in quickfix features
-to navigate to the first occurrence of a particular spell error. 
+to navigate to the first occurrence of a particular spell error. You can also
+manage the spelling errors (mark as good / bad word, globally replace with
+suggestion) directly from the quickfix window via the usual |zg|, |zw|, |z=|
+etc. mappings.
 
 A typical workflow (e.g. when composing email, commit messages, or any form of
 documentation) includes writing and/or quitting the buffer, unless some
@@ -30,58 +33,71 @@ remaining spelling errors require further intervention. This plugin offers
 auxiliary enhanced variants of |:bdelete|, |:write| and |:quit| that check for
 spelling errors and only execute the action if none were found. So by using
 these replacement commands, you'll never send or commit messages full of
-embarrassing typos any more! 
+embarrassing typos any more!
 
 ==============================================================================
 USAGE							    *SpellCheck-usage*
 						  *:SpellCheck* *:SpellLCheck*
-:SpellCheck[!]		Show all spelling errors as a quickfix list. 
+:SpellCheck[!]		Show all spelling errors as a quickfix list.
 			For multiple occurrences of the same error, the first
-			location and the number of occurrences is shown. 
-			If [!] is not given the first error is jumped to. 
+			location and the number of occurrences is shown.
+			If [!] is not given the first error is jumped to.
 
 			In the quickfix list, spelling errors from other
 			buffers are kept, so you can use something like >
 			    :argdo SpellCheck
-<			to gather the spelling errors from multiple buffers. 
+<			to gather the spelling errors from multiple buffers.
 
 :SpellLCheck[!]		Same as ":SpellCheck", except the location list for the
-			current window is used instead of the quickfix list. 
+			current window is used instead of the quickfix list.
+
+MAPPINGS						 *SpellCheck-mappings*
+			Inside the quickfix window, the following mappings are
+			remapped so that they operate on the target spell
+			error: |zg|, |zG|, |zw|, |zW|, |zug|, |zuG|, |zuw|,
+			|zuW|, |z=|
+			For |z=|, all identical misspellings in the buffer are
+			replaced with the chosen suggestion (via
+			|:spellrepall|).
+			For the other commands, the taken action is appended
+			to the quickfix list entry, so that the list serves as
+			a record of done actions (until you refresh the list
+			with a new |:SpellCheck|).
 
 AUXILIARY COMMANDS							     *
 
-The following set of commands just issue an error when spelling errors exist. 
+The following set of commands just issue an error when spelling errors exist.
 
 			   *:BDeleteUnlessSpellError* *:WriteUnlessSpellError*
 		       *:WriteDeleteUnlessSpellError*   *:XitUnlessSpellError*
 :BDeleteUnlessSpellError[!]	|:bdelete| the current buffer, unless it
-				contains spelling errors. 
+				contains spelling errors.
 :WriteUnlessSpellError[!]	|:write| the current buffer, unless it
-				contains spelling errors. 
+				contains spelling errors.
 :WriteDeleteUnlessSpellError[!]	|:write| and |:bdelete| the current buffer,
-				unless it contains spelling errors. 
+				unless it contains spelling errors.
 :XitUnlessSpellError[!]		|:write|  the current buffer and |:quit|,
-				unless it contains spelling errors. 
+				unless it contains spelling errors.
 
 This set of commands automatically opens the quickfix list in case of spelling
 errors.				   *:BDeleteOrSpellCheck* *:WriteOrSpellCheck*
 			       *:WriteDeleteOrSpellCheck*   *:XitOrSpellCheck*
 :BDeleteOrSpellCheck[!]		|:bdelete| the current buffer, or show the
-				spelling errors in the quickfix list. 
+				spelling errors in the quickfix list.
 :WriteOrSpellCheck[!]		|:write| the current buffer, or show the
-				spelling errors in the quickfix list. 
+				spelling errors in the quickfix list.
 :WriteDeleteOrSpellCheck[!]	|:write| and |:bdelete| the current buffer,
 				or show the spelling errors in the quickfix
-				list. 
+				list.
 :XitOrSpellCheck[!]		|:write| the current buffer and |:quit|, or
-				show the spelling errors in the quickfix list. 
+				show the spelling errors in the quickfix list.
 
 							*:UpdateAndSpellCheck*
 :UpdateAndSpellCheck[!]		|:update| the current buffer, and show any
-				spelling errors in the quickfix list. 
+				spelling errors in the quickfix list.
 
 				A [!] is passed to the |:write| / |:bdelete| /
-				|:quit| commands. 
+				|:quit| commands.
 
 ==============================================================================
 INSTALLATION					     *SpellCheck-installation*
@@ -92,27 +108,17 @@ the archive first, e.g. using WinZip. Inside Vim, install by sourcing the
 vimball or via the |:UseVimball| command. >
     vim SpellCheck.vba.gz
     :so %
-To uninstall, use the |:RmVimball| command. 
+To uninstall, use the |:RmVimball| command.
 
 DEPENDENCIES					     *SpellCheck-dependencies*
 
-- Requires Vim 7.0 or higher. 
+- Requires Vim 7.0 or higher.
 
 ==============================================================================
 CONFIGURATION					    *SpellCheck-configuration*
 
-For a permanent configuration, put the following commands into your |vimrc|: 
+For a permanent configuration, put the following commands into your |vimrc|:
 
-						      *g:SpellCheck_OnNospell*
-By default, 'spell' will be automatically enabled when it's off, but you must
-have already set 'spelllang' for a functioning spell check. If you have
-written a custom auto-detection for the languages that you
-frequently use, you can integrate this here through a funcref. The custom
-function must take no arguments, and set 'spell' and 'spelllang' accordingly. >
-    let g:SpellCheck_OnNospell = function('SpellCheck#AutoEnableSpell')
-If you want :SpellCheck to fail when 'spell' is off: >
-    let g:SpellCheck_OnNospell = ''
-<
 					*g:SpellCheck_DefineAuxiliaryCommands*
 If you don't want the auxiliary commands, just the core |:SpellCheck| command,
 use: >
@@ -120,10 +126,28 @@ use: >
 If you just want some of the auxiliary commands, or under different names, or
 similar commands, you can easily define them yourself, as the core spell check
 functionality is available as global autoload functions. Have a look at
-plugin/SpellCheck.vim for inspiration. 
+plugin/SpellCheck.vim for inspiration.
 
+					 *g:SpellCheck_DefineQuickfixMappings*
+If you don't want the |SpellCheck-mappings| that allow you to manage the spell
+errors directly from the quickfix window, use: >
+    let g:SpellCheck_DefineQuickfixMappings = 0
+<
 ==============================================================================
 INTEGRATION					      *SpellCheck-integration*
+						      *g:SpellCheck_OnNospell*
+By default, 'spell' will be automatically enabled when it's off, but you must
+have already set 'spelllang' for a functioning spell check. If you have
+written a custom auto-detection for the languages that you
+frequently use, you can integrate this here through a Funcref. The custom
+function must take no arguments, and set 'spell' and 'spelllang' accordingly. >
+    let g:SpellCheck_OnNospell = function('SpellCheck#AutoEnableSpell')
+If you want :SpellCheck to fail when 'spell' is off: >
+    let g:SpellCheck_OnNospell = ''
+<
+						     *g:SpellCheck_OnSpellAdd*
+All commands that manipulate the word lists are executed through a Funcref; by
+default, it automatically enables 'spell', like |g:SpellCheck_OnNospell|.
 
 ==============================================================================
 LIMITATIONS					      *SpellCheck-limitations*
@@ -137,19 +161,27 @@ IDEAS							    *SpellCheck-ideas*
 ==============================================================================
 HISTORY							  *SpellCheck-history*
 
+1.11	30-Apr-2012
+ENH: Capture corrected text and include in quickfix status message.
+
+1.10	30-Apr-2012
+ENH: Allow to manage the spelling errors (mark as good / bad word, globally
+replace with suggestion) directly from the quickfix window via the usual zg,
+zw, z= etc. mappings.
+
 1.01	14-Dec-2011
 ENH: Allow accumulating spelling errors from multiple buffers (e.g. via :argdo
-SpellCheck). 
+SpellCheck).
 
 1.00	06-Dec-2011
-First published version. 
+First published version.
 
 0.01	02-Dec-2011
-Started development. 
+Started development.
 
 ==============================================================================
-Copyright: (C) 2011 Ingo Karkat
-The VIM LICENSE applies to this script; see |copyright|. 
+Copyright: (C) 2011-2012 Ingo Karkat
+The VIM LICENSE applies to this script; see |copyright|.
 
 Maintainer:	Ingo Karkat <ingo@karkat.de>
 ==============================================================================
