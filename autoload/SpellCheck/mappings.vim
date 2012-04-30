@@ -157,6 +157,11 @@ function! s:QuickfixInsertCorrectionMessage()
 
     call s:QuickfixInsertMessage('corrected' . (empty(l:changedText) ? '' : ': ' . l:changedText))
 endfunction
+function! s:UndoWrapper()
+    execute "normal! \<CR>"
+    normal u
+    wincmd p
+endfunction
 function! SpellCheck#mappings#MakeMappings()
     " Intercept word list management commands.
     " The command wrapper itself checks for the success of the wrapped command,
@@ -172,6 +177,11 @@ function! SpellCheck#mappings#MakeMappings()
     " update the list entry after we're back in the quickfix list.
     nnoremap <silent> <expr> <SID>(SpellSuggestWrapper) <SID>GetCountAndRecordBefore() . SpellCheck#mappings#SpellSuggestWrapper('call <SID>RecordAfter()', 'call SpellCheck#mappings#SpellRepeat()', 'wincmd p', 'if <SID>IsChangeRecorded()<Bar>call <SID>QuickfixInsertCorrectionMessage()<Bar>endif')
     nnoremap <silent> <script> <buffer> z= :<C-u>call <SID>SetCount()<CR><CR><SID>(SpellSuggestWrapper)
+
+    " Apply undo to the target buffer to allow a quick revert of a spell
+    " correction. As the quickfix window usually is not modifiable, the undo
+    " command normally doesn't make sense there.
+    nnoremap <silent> <buffer> u :<C-u>call <SID>UndoWrapper()<CR>
 endfunction
 
 " vim: set ts=8 sts=4 sw=4 noexpandtab ff=unix fdm=syntax :
