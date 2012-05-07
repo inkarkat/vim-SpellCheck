@@ -38,7 +38,7 @@ embarrassing typos any more!
 ==============================================================================
 USAGE							    *SpellCheck-usage*
 						  *:SpellCheck* *:SpellLCheck*
-:SpellCheck[!]		Show all spelling errors as a quickfix list.
+:[range]SpellCheck[!]	Show all spelling errors as a quickfix list.
 			For multiple occurrences of the same error, the first
 			location and the number of occurrences is shown.
 			If [!] is not given the first error is jumped to.
@@ -48,17 +48,20 @@ USAGE							    *SpellCheck-usage*
 			    :argdo SpellCheck
 <			to gather the spelling errors from multiple buffers.
 
-:SpellLCheck[!]		Same as ":SpellCheck", except the location list for the
+:[range]SpellLCheck[!]	Same as :SpellCheck, except the location list for the
 			current window is used instead of the quickfix list.
 
 MAPPINGS						 *SpellCheck-mappings*
 			Inside the quickfix window, the following mappings are
 			remapped so that they operate on the target spell
 			error: |zg|, |zG|, |zw|, |zW|, |zug|, |zuG|, |zuw|,
-			|zuW|, |z=|
+			|zuW|, |z=|, |u|
 			For |z=|, all identical misspellings in the buffer are
 			replaced with the chosen suggestion (via
 			|:spellrepall|).
+			You can also quickly undo the last spell suggestion
+			from the quickfix window (i.e. without switching to
+			the target buffer) via |u|.
 			For the other commands, the taken action is appended
 			to the quickfix list entry, so that the list serves as
 			a record of done actions (until you refresh the list
@@ -160,6 +163,14 @@ IDEAS							    *SpellCheck-ideas*
 
 ==============================================================================
 HISTORY							  *SpellCheck-history*
+
+1.13	02-May-2012
+ENH: In the quickfix list, apply undo via |u| to the target buffer to allow a
+quick revert of a spell correction.
+
+1.12	01-May-2012
+ENH: Allow spell checking of partial buffers by allowing [range] for
+:SpellCheck command.
 
 1.11	30-Apr-2012
 ENH: Capture corrected text and include in quickfix status message.
