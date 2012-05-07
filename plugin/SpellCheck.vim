@@ -10,6 +10,7 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.12.005	01-May-2012	ENH: Allow [range] for :SpellCheck command.
 "   1.10.004	30-Apr-2012	Add g:SpellCheck_OnSpellAdd hook.
 "   1.00.003	06-Dec-2011	FIX: Missing :quit in :XitOrSpellCheck.
 "	002	03-Dec-2011	Rename configvar to g:SpellCheck_OnNospell.
@@ -70,7 +71,7 @@ if g:SpellCheck_DefineAuxiliaryCommands
     command! -bar -bang UpdateAndSpellCheck         update<bang> | call SpellCheck#quickfix#List(0, 0)
 endif
 
-command! -bar -bang SpellCheck  call SpellCheck#quickfix#List(<bang>0, 0)
-command! -bar -bang SpellLCheck call SpellCheck#quickfix#List(<bang>0, 1)
+command! -bar -bang -range=% SpellCheck  call SpellCheck#quickfix#List(<line1>, <line2>, <bang>0, 0)
+command! -bar -bang -range=% SpellLCheck call SpellCheck#quickfix#List(<line1>, <line2>, <bang>0, 1)
 
 " vim: set ts=8 sts=4 sw=4 noexpandtab ff=unix fdm=syntax :
