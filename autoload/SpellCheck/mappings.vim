@@ -10,6 +10,8 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.13.004	01-May-2012	ENH: Apply undo to the target buffer to allow a
+"				quick revert of a spell correction.
 "   1.11.003	30-Apr-2012	ENH: Capture corrected text and include in
 "				quickfix status message.
 "   1.10.002	30-Apr-2012	Add quickfix mappings for word list management.
@@ -110,7 +112,7 @@ function! s:InsertMessage( entry, statusMessage )
 
     return l:entry
 endfunction
-function! s:QuickfixInsertMessage( statusMessage )
+function! s:QuickfixSetline( lnum, text )
     if &l:buftype !=# 'quickfix'
 	" Oops, the return to the quickfix window went wrong.
 	return
@@ -119,9 +121,12 @@ function! s:QuickfixInsertMessage( statusMessage )
     let l:save_modified = &l:modified
     let l:save_modifiable = &l:modifiable
     setlocal modifiable
-    call setline('.', s:InsertMessage(getline('.'), a:statusMessage))
+    call setline(a:lnum, a:text)
     let &l:modifiable = l:save_modifiable   " Keep the normally immutable state of the quickfix list.
     let &l:modified = l:save_modified   " We don't want Vim prompting for saving of the changes, and can't just add 'buftype+=nofile'.
+endfunction
+function! s:QuickfixInsertMessage( lnum, statusMessage )
+    call s:QuickfixSetline(a:lnum, s:InsertMessage(getline(a:lnum), a:statusMessage))
 endfunction
 function! SpellCheck#mappings#OnSpellAdd( command, statusMessage )
     execute "normal! \<CR>"
@@ -129,7 +134,7 @@ function! SpellCheck#mappings#OnSpellAdd( command, statusMessage )
     wincmd p
 
     if ! l:isSuccess || empty(a:statusMessage) | return | endif
-    call s:QuickfixInsertMessage(a:statusMessage)
+    call s:QuickfixInsertMessage(line('.'), a:statusMessage)
 endfunction
 function! s:GetCorrectedText()
     " XXX: Unfortunately, Vim doesn't set the change marks `[ `] on z=, so we
@@ -137,9 +142,7 @@ function! s:GetCorrectedText()
     " and cut away identical words from the front and end until we've narrowed
     " it down to the change.
     let l:beforeWords = ingocollections#SplitKeepSeparators(s:beforeLineContent, '\k\@!.')
-    unlet s:beforeLineContent   " May be huge; free it.
     let l:afterWords = ingocollections#SplitKeepSeparators(s:afterLineContent, '\k\@!.')
-    unlet s:afterLineContent    " May be huge; free it.
 
     let l:startIdx = 0
     while get(l:beforeWords, l:startIdx, '') ==# get(l:afterWords, l:startIdx, '')
@@ -155,12 +158,31 @@ endfunction
 function! s:QuickfixInsertCorrectionMessage()
     let l:changedText = s:GetCorrectedText()
 
-    call s:QuickfixInsertMessage('corrected' . (empty(l:changedText) ? '' : ': ' . l:changedText))
+    call s:QuickfixInsertMessage(line('.'), 'corrected' . (empty(l:changedText) ? '' : ': ' . l:changedText))
+endfunction
+function! s:UndoCorrectedQuickfixEntry( lnum )
+    let l:correctionMessgePattern = ' \[corrected: .*]$'
+    if getline(a:lnum) =~# l:correctionMessgePattern
+	call s:QuickfixSetline(a:lnum, matchstr(getline(a:lnum), '^.*\ze' . l:correctionMessgePattern))
+	return 1
+    endif
+    return 0
 endfunction
 function! s:UndoWrapper()
     execute "normal! \<CR>"
+	let l:isAfterSpellCorrection = (exists('s:afterLineContent') && getline('.') ==# s:afterLineContent)
     normal u
+	let l:isSpellCorrectionUndone = (l:isAfterSpellCorrection && exists('s:beforeLineContent') && getline('.') ==# s:beforeLineContent)
+	unlet! s:beforeLineContent s:afterLineContent
     wincmd p
+	if l:isSpellCorrectionUndone
+	    if ! s:UndoCorrectedQuickfixEntry(line('.'))
+		" The user might have already progressed to the next quickfix
+		" entry when he realized he wanted to undo the previous
+		" correction.
+		call s:UndoCorrectedQuickfixEntry(line('.') - 1)
+	    endif
+	endif
 endfunction
 function! SpellCheck#mappings#MakeMappings()
     " Intercept word list management commands.
