@@ -69,7 +69,8 @@ MAPPINGS						 *SpellCheck-mappings*
 
 AUXILIARY COMMANDS							     *
 
-The following set of commands just issue an error when spelling errors exist.
+The following set of commands just issue an error when spelling errors exist
+in the buffer or passed [range] of lines.
 
 			   *:BDeleteUnlessSpellError* *:WriteUnlessSpellError*
 		       *:WriteDeleteUnlessSpellError*   *:XitUnlessSpellError*
@@ -83,7 +84,8 @@ The following set of commands just issue an error when spelling errors exist.
 				unless it contains spelling errors.
 
 This set of commands automatically opens the quickfix list in case of spelling
-errors.				   *:BDeleteOrSpellCheck* *:WriteOrSpellCheck*
+error in the buffer or passed [range] of lines.
+				   *:BDeleteOrSpellCheck* *:WriteOrSpellCheck*
 			       *:WriteDeleteOrSpellCheck*   *:XitOrSpellCheck*
 :BDeleteOrSpellCheck[!]		|:bdelete| the current buffer, or show the
 				spelling errors in the quickfix list.
@@ -163,6 +165,12 @@ IDEAS							    *SpellCheck-ideas*
 
 ==============================================================================
 HISTORY							  *SpellCheck-history*
+
+1.20	08-May-2012
+- FIX: Line range is not defined and passed for :BDeleteOrSpellCheck and other
+  :...OrSpellCheck commands, resulting in a script error.
+- ENH: Allow [range] for :BDeleteUnlessSpellError and other
+  :...UnlessSpellError commands, too.
 
 1.13	02-May-2012
 ENH: In the quickfix list, apply undo via |u| to the target buffer to allow a
