@@ -108,16 +108,18 @@ error in the buffer or passed [range] of lines.
 INSTALLATION					     *SpellCheck-installation*
 
 This script is packaged as a |vimball|. If you have the "gunzip" decompressor
-in your PATH, simply edit the *.vba.gz package in Vim; otherwise, decompress
+in your PATH, simply edit the *.vmb.gz package in Vim; otherwise, decompress
 the archive first, e.g. using WinZip. Inside Vim, install by sourcing the
 vimball or via the |:UseVimball| command. >
-    vim SpellCheck.vba.gz
+    vim SpellCheck*.vmb.gz
     :so %
 To uninstall, use the |:RmVimball| command.
 
 DEPENDENCIES					     *SpellCheck-dependencies*
 
 - Requires Vim 7.0 or higher.
+- Requires the |ingo-library.vim| plugin (vimscript #4433), version 1.001 or
+  higher.
 
 ==============================================================================
 CONFIGURATION					    *SpellCheck-configuration*
