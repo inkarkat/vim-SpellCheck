@@ -8,6 +8,8 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.20.004	08-May-2012	ENH: Allow [range] for :BDeleteUnlessSpellError
+"				and other :...UnlessSpellError commands, too.
 "   1.10.003	30-Apr-2012	Add SpellCheck#SpellAddWrapper() function as
 "				default for new g:SpellCheck_OnSpellAdd hook.
 "   1.00.002	06-Dec-2011	Publish.
@@ -75,9 +77,10 @@ function! s:GotoNextSpellError()
     set wrapscan
 	" XXX: Vim 7.3 does not move to the sole spell error when the cursor is
 	" after the spell error in the same line. Work around this by trying the
-	" other direction, too.
+	" other direction, too, but ensure to keep within a passed range by
+	" moving back forward again.
 	"silent! normal! ]s
-	silent! normal! ]s[s
+	silent! normal! ]s[s]s
     let &wrapscan = l:save_wrapscan
 endfunction
 function! s:GotoFirstMisspelling()
@@ -87,18 +90,26 @@ function! s:GotoFirstMisspelling()
     let &wrapscan = l:save_wrapscan
     normal! zv
 endfunction
-function! SpellCheck#CheckErrors( isNoJump )
+function! SpellCheck#CheckErrors( firstLine, lastLine, isNoJump )
     if ! SpellCheck#CheckEnabledSpelling()
 	return 2
     endif
 
     let l:save_view = winsaveview()
 	let l:isError = 0
+	if a:firstLine > 1 || a:lastLine < line('$')
+	    " When not the entire buffer is covered, put the cursor at the
+	    " beginning of the range, so that a valid spell error can be
+	    " discovered with a single jump to the next error.
+	    call cursor(a:firstLine, 1)
+	endif
 	let l:currentPos = getpos('.')
 
 	call s:GotoNextSpellError()
 
-	if getpos('.') != l:currentPos
+	if line('.') < a:firstLine || line('.') > a:lastLine
+	    " The next spell error lies outside the passed range.
+	elseif getpos('.') != l:currentPos
 	    let l:isError = 1
 	else
 	    " Either there are no spelling errors at all, or we're on the sole
