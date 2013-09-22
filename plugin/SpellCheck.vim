@@ -10,6 +10,11 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.20.006	08-May-2012	FIX: Line range is not defined and passed for
+"				:BDeleteOrSpellCheck and other :...OrSpellCheck
+"				commands, resulting in a script error.
+"				ENH: Allow [range] for :BDeleteUnlessSpellError
+"				and other :...UnlessSpellError commands, too.
 "   1.12.005	01-May-2012	ENH: Allow [range] for :SpellCheck command.
 "   1.10.004	30-Apr-2012	Add g:SpellCheck_OnSpellAdd hook.
 "   1.00.003	06-Dec-2011	FIX: Missing :quit in :XitOrSpellCheck.
@@ -58,17 +63,17 @@ endif
 "- commands --------------------------------------------------------------------
 
 if g:SpellCheck_DefineAuxiliaryCommands
-    command! -bar -bang BDeleteUnlessSpellError     if ! SpellCheck#CheckErrors(0)      | bdelete<bang> | endif
-    command! -bar -bang WriteUnlessSpellError       if ! SpellCheck#CheckErrors(0)      | write<bang> | endif
-    command! -bar -bang WriteDeleteUnlessSpellError if ! SpellCheck#CheckErrors(0)      | write<bang> | bdelete<bang> | endif
-    command! -bar -bang XitUnlessSpellError         if ! SpellCheck#CheckErrors(0)      | write<bang> | quit<bang> | endif
+    command! -bar -bang -range=% BDeleteUnlessSpellError     if ! SpellCheck#CheckErrors(<line1>, <line2>, 0)      | bdelete<bang> | endif
+    command! -bar -bang -range=% WriteUnlessSpellError       if ! SpellCheck#CheckErrors(<line1>, <line2>, 0)      | write<bang> | endif
+    command! -bar -bang -range=% WriteDeleteUnlessSpellError if ! SpellCheck#CheckErrors(<line1>, <line2>, 0)      | write<bang> | bdelete<bang> | endif
+    command! -bar -bang -range=% XitUnlessSpellError         if ! SpellCheck#CheckErrors(<line1>, <line2>, 0)      | write<bang> | quit<bang> | endif
 
-    command! -bar -bang BDeleteOrSpellCheck         if ! SpellCheck#quickfix#List(0, 0) | bdelete<bang> | endif
-    command! -bar -bang WriteOrSpellCheck           if ! SpellCheck#quickfix#List(0, 0) | write<bang> | endif
-    command! -bar -bang WriteDeleteOrSpellCheck     if ! SpellCheck#quickfix#List(0, 0) | write<bang> | bdelete<bang> | endif
-    command! -bar -bang XitOrSpellCheck             if ! SpellCheck#quickfix#List(0, 0) | write<bang> | quit<bang> | endif
+    command! -bar -bang -range=% BDeleteOrSpellCheck         if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0) | bdelete<bang> | endif
+    command! -bar -bang -range=% WriteOrSpellCheck           if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0) | write<bang> | endif
+    command! -bar -bang -range=% WriteDeleteOrSpellCheck     if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0) | write<bang> | bdelete<bang> | endif
+    command! -bar -bang -range=% XitOrSpellCheck             if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0) | write<bang> | quit<bang> | endif
 
-    command! -bar -bang UpdateAndSpellCheck         update<bang> | call SpellCheck#quickfix#List(0, 0)
+    command! -bar -bang -range=% UpdateAndSpellCheck         update<bang> | call SpellCheck#quickfix#List(<line1>, <line2>, 0, 0)
 endif
 
 command! -bar -bang -range=% SpellCheck  call SpellCheck#quickfix#List(<line1>, <line2>, <bang>0, 0)
