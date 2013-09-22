@@ -168,6 +168,9 @@ IDEAS							    *SpellCheck-ideas*
 ==============================================================================
 HISTORY							  *SpellCheck-history*
 
+1.21	RELEASEME
+- Add dependency to ingo-library (vimscript #4433).
+
 1.20	08-May-2012
 - FIX: Line range is not defined and passed for :BDeleteOrSpellCheck and other
   :...OrSpellCheck commands, resulting in a script error.
@@ -201,7 +204,7 @@ First published version.
 Started development.
 
 ==============================================================================
-Copyright: (C) 2011-2012 Ingo Karkat
+Copyright: (C) 2011-2013 Ingo Karkat
 The VIM LICENSE applies to this plugin; see |copyright|.
 
 Maintainer:	Ingo Karkat <ingo@karkat.de>
