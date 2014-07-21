@@ -4,12 +4,16 @@
 "   - Requires Vim 7.0 or higher.
 "   - SpellCheck/quickfix.vim autoload script.
 "
-" Copyright: (C) 2011-2012 Ingo Karkat
+" Copyright: (C) 2011-2013 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.21.007	23-Sep-2013	Add :NextUnlessSpellError and :NextOrSpellCheck
+"				auxiliary commands.
+"				Allow to pass optional [++opt] [file] arguments
+"				to the :Write... commands.
 "   1.20.006	08-May-2012	FIX: Line range is not defined and passed for
 "				:BDeleteOrSpellCheck and other :...OrSpellCheck
 "				commands, resulting in a script error.
@@ -63,15 +67,17 @@ endif
 "- commands --------------------------------------------------------------------
 
 if g:SpellCheck_DefineAuxiliaryCommands
-    command! -bar -bang -range=% BDeleteUnlessSpellError     if ! SpellCheck#CheckErrors(<line1>, <line2>, 0)      | bdelete<bang> | endif
-    command! -bar -bang -range=% WriteUnlessSpellError       if ! SpellCheck#CheckErrors(<line1>, <line2>, 0)      | write<bang> | endif
-    command! -bar -bang -range=% WriteDeleteUnlessSpellError if ! SpellCheck#CheckErrors(<line1>, <line2>, 0)      | write<bang> | bdelete<bang> | endif
-    command! -bar -bang -range=% XitUnlessSpellError         if ! SpellCheck#CheckErrors(<line1>, <line2>, 0)      | write<bang> | quit<bang> | endif
+    command! -bar -bang -range=%                         BDeleteUnlessSpellError     if ! SpellCheck#CheckErrors(<line1>, <line2>, 0)      | bdelete<bang>      | endif
+    command! -bar -bang -range=% -nargs=* -complete=file WriteUnlessSpellError       if ! SpellCheck#CheckErrors(<line1>, <line2>, 0)      | write<bang> <args> | endif
+    command! -bar -bang -range=% -nargs=* -complete=file WriteDeleteUnlessSpellError if ! SpellCheck#CheckErrors(<line1>, <line2>, 0)      | write<bang> <args> | bdelete<bang> | endif
+    command! -bar -bang -range=%                         XitUnlessSpellError         if ! SpellCheck#CheckErrors(<line1>, <line2>, 0)      | write<bang>        | quit<bang> | endif
+    command! -bar -bang -range=% -nargs=* -complete=file NextUnlessSpellError        if ! SpellCheck#CheckErrors(<line1>, <line2>, 0)      | next<bang> <args> | endif
 
-    command! -bar -bang -range=% BDeleteOrSpellCheck         if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0) | bdelete<bang> | endif
-    command! -bar -bang -range=% WriteOrSpellCheck           if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0) | write<bang> | endif
-    command! -bar -bang -range=% WriteDeleteOrSpellCheck     if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0) | write<bang> | bdelete<bang> | endif
-    command! -bar -bang -range=% XitOrSpellCheck             if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0) | write<bang> | quit<bang> | endif
+    command! -bar -bang -range=%                         BDeleteOrSpellCheck         if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0) | bdelete<bang> | endif
+    command! -bar -bang -range=% -nargs=* -complete=file WriteOrSpellCheck           if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0) | write<bang> | endif
+    command! -bar -bang -range=% -nargs=* -complete=file WriteDeleteOrSpellCheck     if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0) | write<bang> | bdelete<bang> | endif
+    command! -bar -bang -range=%                         XitOrSpellCheck             if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0) | write<bang> | quit<bang> | endif
+    command! -bar -bang -range=% -nargs=* -complete=file NextOrSpellCheck            if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0) | next<bang> <args> | endif
 
     command! -bar -bang -range=% UpdateAndSpellCheck         update<bang> | call SpellCheck#quickfix#List(<line1>, <line2>, 0, 0)
 endif
