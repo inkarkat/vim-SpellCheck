@@ -4,7 +4,7 @@
 "   - SpellCheck.vim autoload script
 "   - ingo/collections.vim autoload script
 "
-" Copyright: (C) 2012-2013 Ingo Karkat
+" Copyright: (C) 2012-2014 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
@@ -107,10 +107,10 @@ endfunction
 function! s:InsertMessage( entry, statusMessage )
     let l:entry = a:entry
     if a:statusMessage =~# '\<undo '
-	let l:entry = substitute(l:entry, '\C\V' . printf(' [%s]\$', escape(substitute(a:statusMessage, '\Cundo ', '', ''), '\')), '', '')
+	let l:entry = substitute(l:entry, '\C\V' . printf(' [%s]\%($\|\ze\t\t\)', escape(substitute(a:statusMessage, '\Cundo ', '', ''), '\')), '', '')
     endif
     if l:entry ==# a:entry
-	let l:entry .= printf(' [%s]', a:statusMessage)
+	let l:entry = substitute(l:entry, '| \k\+\%( (\d\+)\)\?\zs\%($\|\ze\t\t\)', escape(printf(' [%s]', a:statusMessage), ''), '\')
     endif
 
     return l:entry
@@ -164,9 +164,9 @@ function! s:QuickfixInsertCorrectionMessage()
     call s:QuickfixInsertMessage(line('.'), 'corrected' . (empty(l:changedText) ? '' : ': ' . l:changedText))
 endfunction
 function! s:UndoCorrectedQuickfixEntry( lnum )
-    let l:correctionMessgePattern = ' \[corrected: .*]$'
+    let l:correctionMessgePattern = ' \[corrected: .*]\%($\|\ze\t\t\)'
     if getline(a:lnum) =~# l:correctionMessgePattern
-	call s:QuickfixSetline(a:lnum, matchstr(getline(a:lnum), '^.*\ze' . l:correctionMessgePattern))
+	call s:QuickfixSetline(a:lnum, substitute(getline(a:lnum), l:correctionMessgePattern, '', ''))
 	return 1
     endif
     return 0
