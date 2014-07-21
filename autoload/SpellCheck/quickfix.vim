@@ -3,34 +3,35 @@
 " DEPENDENCIES:
 "   - SpellCheck.vim autoload script.
 "
-" Copyright: (C) 2011 Ingo Karkat
+" Copyright: (C) 2011-2012 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.12.005	01-May-2012	ENH: Allow [range] for :SpellCheck command.
 "   1.01.002	06-Dec-2011	ENH: Allow accumulating spelling errors from
 "				multiple buffers (e.g. via :argdo SpellCheck).
 "   1.00.001	06-Dec-2011	Publish.
 "	001	02-Dec-2011	file creation
 
-function! s:GotoNextLine()
-    if line('.') < line('$')
+function! s:GotoNextLine( lastLine )
+    if line('.') < a:lastLine
 	call cursor(line('.') + 1, 1)
 	return 1
     else
 	return 0
     endif
 endfunction
-function! s:RetrieveSpellErrors()
+function! s:RetrieveSpellErrors( firstLine, lastLine )
     let l:spellErrorInfo = {}
     let l:spellErrorList = []
-    call cursor(1,1)
+    call cursor(a:firstLine, 1)
 
     while 1
 	let [l:spellBadWord, l:errorType] = spellbadword()
 	if empty(l:spellBadWord)
-	    if s:GotoNextLine()
+	    if s:GotoNextLine(a:lastLine)
 		continue
 	    else
 		break
@@ -47,7 +48,7 @@ function! s:RetrieveSpellErrors()
 	let l:colAfterBadWord = col('.') + len(l:spellBadWord)
 	if l:colAfterBadWord < col('$')
 	    call cursor(line('.'), l:colAfterBadWord)
-	elseif ! s:GotoNextLine()
+	elseif ! s:GotoNextLine(a:lastLine)
 	    break
 	endif
     endwhile
@@ -98,13 +99,13 @@ function! s:FillQuickfixList( bufnr, spellErrorList, spellErrorInfo, isNoJump, i
     silent execute 'doautocmd QuickFixCmdPost' (a:isUseLocationList ? 'lspell' : 'spell') | " Allow hooking into the quickfix update.
 endfunction
 
-function! SpellCheck#quickfix#List( isNoJump, isUseLocationList )
+function! SpellCheck#quickfix#List( firstLine, lastLine, isNoJump, isUseLocationList )
     if ! SpellCheck#CheckEnabledSpelling()
 	return 2
     endif
 
     let l:save_view = winsaveview()
-	let [l:spellErrorList, l:spellErrorInfo] = s:RetrieveSpellErrors()
+	let [l:spellErrorList, l:spellErrorInfo] = s:RetrieveSpellErrors(a:firstLine, a:lastLine)
     call winrestview(l:save_view)
 
     call s:FillQuickfixList(bufnr(''), l:spellErrorList, l:spellErrorInfo, a:isNoJump, a:isUseLocationList)
