@@ -10,6 +10,8 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.21.006	14-Jun-2013	Minor: Make substitute() robust against
+"				'ignorecase'.
 "   1.21.005	21-Feb-2013	Move to ingo-library.
 "   1.13.004	01-May-2012	ENH: Apply undo to the target buffer to allow a
 "				quick revert of a spell correction.
@@ -105,7 +107,7 @@ endfunction
 function! s:InsertMessage( entry, statusMessage )
     let l:entry = a:entry
     if a:statusMessage =~# '\<undo '
-	let l:entry = substitute(l:entry, '\C\V' . printf(' [%s]\$', escape(substitute(a:statusMessage, 'undo ', '', ''), '\')), '', '')
+	let l:entry = substitute(l:entry, '\C\V' . printf(' [%s]\$', escape(substitute(a:statusMessage, '\Cundo ', '', ''), '\')), '', '')
     endif
     if l:entry ==# a:entry
 	let l:entry .= printf(' [%s]', a:statusMessage)
