@@ -1,4 +1,3 @@
-autoload/ingocollections.vim
 autoload/SpellCheck.vim
 autoload/SpellCheck/mappings.vim
 autoload/SpellCheck/quickfix.vim
