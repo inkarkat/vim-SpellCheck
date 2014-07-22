@@ -4,12 +4,13 @@
 "   - Requires Vim 7.0 or higher.
 "   - SpellCheck/quickfix.vim autoload script.
 "
-" Copyright: (C) 2011-2013 Ingo Karkat
+" Copyright: (C) 2011-2014 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.30.008	22-Jul-2014	Add configuration for error context.
 "   1.21.007	23-Sep-2013	Add :NextUnlessSpellError and :NextOrSpellCheck
 "				auxiliary commands.
 "				Allow to pass optional [++opt] [file] arguments
@@ -46,6 +47,13 @@ if ! exists('g:SpellCheck_DefineAuxiliaryCommands')
 endif
 if ! exists('g:SpellCheck_DefineQuickfixMappings')
     let g:SpellCheck_DefineQuickfixMappings = 1
+endif
+
+if ! exists('g:SpellCheck_ErrorContextNum')
+    let g:SpellCheck_ErrorContextNum = 99
+endif
+if ! exists('g:SpellCheck_ErrorContextPattern')
+    let g:SpellCheck_ErrorContextPattern = '\%(\k*\%(\k\@!\S\)\+\|\k\+\s\+\)\?%s.\k*\%(\%(\k\@!\S\)\+\k*\|\s\+\k\+\)\?'
 endif
 
 
