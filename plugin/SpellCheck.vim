@@ -31,6 +31,8 @@ if exists('g:loaded_SpellCheck') || (v:version < 700)
     finish
 endif
 let g:loaded_SpellCheck = 1
+let s:save_cpo = &cpo
+set cpo&vim
 
 "- configuration ---------------------------------------------------------------
 
@@ -52,14 +54,29 @@ endif
 if ! exists('g:SpellCheck_ErrorContextNum')
     let g:SpellCheck_ErrorContextNum = 99
 endif
+
+" From :help spellfile-cleanup:
+"   Vim uses a fixed method to recognize a word.  This is independent of
+"   'iskeyword', so that it also works in help files and for languages that
+"   include characters like '-' in 'iskeyword'. [...]
+"   The table with word characters is stored in the main .spl file.
+" Since we cannot easily query that table, approximate the set of characters.
+if ! exists('g:SpellCheck_SpellWordPattern')
+    let g:SpellCheck_SpellWordPattern = '[[:alnum:]'']'
+endif
+
 if ! exists('g:SpellCheck_ErrorContextPattern')
-    let g:SpellCheck_ErrorContextPattern = '\%(\k*\%(\k\@!\S\)\+\|\k\+\s\+\)\?%s.\k*\%(\%(\k\@!\S\)\+\k*\|\s\+\k\+\)\?'
+    let g:SpellCheck_ErrorContextPattern = '\%(' . g:SpellCheck_SpellWordPattern . '*\%(' . g:SpellCheck_SpellWordPattern . '\@!\S\)\+\|' . g:SpellCheck_SpellWordPattern . '\+\s\+\)\?%s.' . g:SpellCheck_SpellWordPattern . '*\%(\%(' . g:SpellCheck_SpellWordPattern . '\@!\S\)\+' . g:SpellCheck_SpellWordPattern . '*\|\s\+' . g:SpellCheck_SpellWordPattern . '\+\)\?'
+endif
+
+if ! exists('g:SpellCheck_IsQuickfixHighlight')
+    let g:SpellCheck_IsQuickfixHighlight = 1
 endif
 
 
 "- mappings --------------------------------------------------------------------
 
-if g:SpellCheck_DefineQuickfixMappings
+if g:SpellCheck_DefineQuickfixMappings || g:SpellCheck_IsQuickfixHighlight
     augroup SpellCheckQuickfixMappings
 	" Note: Cannot use the QuickFixCmdPost event directly, as it does not
 	" necessarily fire in the quickfix window! Fortunately, a BufRead event
@@ -67,7 +84,15 @@ if g:SpellCheck_DefineQuickfixMappings
 	" window is opened. (And the filetype is (re-)set afterwards, too.)
 	" So, we use the QuickFixCmdPost event as a trigger to create the
 	" mappings (once!) for the quickfix window when it is opened.
-	autocmd! QuickFixCmdPost spell,lspell autocmd! SpellCheckQuickfixMappings BufRead quickfix call SpellCheck#mappings#MakeMappings() | autocmd! SpellCheckQuickfixMappings BufRead quickfix
+	autocmd! QuickFixCmdPost spell,lspell
+	\   autocmd! SpellCheckQuickfixMappings BufRead quickfix
+	\       if g:SpellCheck_DefineQuickfixMappings |
+	\           call SpellCheck#mappings#MakeMappings() |
+	\       endif |
+	\       if g:SpellCheck_IsQuickfixHighlight |
+	\           call SpellCheck#quickfix#DefineHighlights() |
+	\       endif |
+	\       autocmd! SpellCheckQuickfixMappings BufRead quickfix
     augroup END
 endif
 
@@ -93,4 +118,15 @@ endif
 command! -bar -bang -range=% SpellCheck  call SpellCheck#quickfix#List(<line1>, <line2>, <bang>0, 0)
 command! -bar -bang -range=% SpellLCheck call SpellCheck#quickfix#List(<line1>, <line2>, <bang>0, 1)
 
+
+"- highlight groups ------------------------------------------------------------
+
+if g:SpellCheck_IsQuickfixHighlight
+    highlight def link qfSpellErrorWord             SpellBad
+    highlight def link qfSpellErrorWordInContext    Normal
+    highlight def link qfSpellContext               SpecialKey
+endif
+
+let &cpo = s:save_cpo
+unlet s:save_cpo
 " vim: set ts=8 sts=4 sw=4 noexpandtab ff=unix fdm=syntax :
