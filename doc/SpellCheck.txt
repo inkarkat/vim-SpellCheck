@@ -180,6 +180,12 @@ IDEAS							    *SpellCheck-ideas*
 ==============================================================================
 HISTORY							  *SpellCheck-history*
 
+1.30	RELEASEME
+- ENH: Show words surrounding the spell error. The number of captured
+  occurrences is controlled by g:SpellCheck_ErrorContextNum, what gets
+  captured by g:SpellCheck_ErrorContextPattern. Thanks to Enno Nagel for the
+  suggestion.
+
 1.21	23-Sep-2013
 - Add :NextUnlessSpellError and :NextOrSpellCheck auxiliary commands.
 - Allow to pass optional [++opt] [file] arguments to the :Write... commands.
@@ -219,7 +225,7 @@ First published version.
 Started development.
 
 ==============================================================================
-Copyright: (C) 2011-2013 Ingo Karkat
+Copyright: (C) 2011-2014 Ingo Karkat
 The VIM LICENSE applies to this plugin; see |copyright|.
 
 Maintainer:	Ingo Karkat <ingo@karkat.de>
