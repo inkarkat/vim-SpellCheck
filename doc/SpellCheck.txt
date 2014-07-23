@@ -152,6 +152,30 @@ If you don't want the |SpellCheck-mappings| that allow you to manage the spell
 errors directly from the quickfix window, use: >
     let g:SpellCheck_DefineQuickfixMappings = 0
 <
+						*g:SpellCheck_ErrorContextNum*
+The |:SpellCheck| command captures not just the misspelled word, but also some
+text around it, to provide context in the quickfix list. The number of
+occurrences of a particular spell error is set at: >
+    let g:SpellCheck_ErrorContextNum = 99
+You can tweak that, reduce it to 1 to only show the first, or 0 to completely
+turn off context.
+	    *g:SpellCheck_ErrorContextPattern* *g:SpellCheck_SpellWordPattern*
+What text around the current spell error gets captured can be tweaked via a
+regular expression that contains a %s parameter, which is replaced with the
+atom for the spell error start position. As Vim uses a special,
+spellfile-dependent definition of word characters, these can be tweaked
+separately.
+					      *g:SpellCheck_QuickfixHighlight*
+The plugin can provide additional syntax highlighting for the quickfix window
+when it contains spell errors; to turn this off, use: >
+    let g:SpellCheck_QuickfixHighlight = 0
+<							   *SpellCheck-colors*
+To change the highlighting colors, redefine (after any |:colorscheme| command)
+or link the two highlight groups: >
+    highlight link qfSpellErrorWord             SpellBad
+    highlight link qfSpellErrorWordInContext    Normal
+    highlight link qfSpellContext               SpecialKey
+<
 ==============================================================================
 INTEGRATION					      *SpellCheck-integration*
 						      *g:SpellCheck_OnNospell*
@@ -185,6 +209,12 @@ HISTORY							  *SpellCheck-history*
   occurrences is controlled by g:SpellCheck_ErrorContextNum, what gets
   captured by g:SpellCheck_ErrorContextPattern. Thanks to Enno Nagel for the
   suggestion.
+- ENH: Add syntax highlighting for the misspelled word, the error context
+  text, and occurrences of the misspelled word inside the context. Enno Nagel
+  also suggested this.
+- FIX: Quickfix mappings are gone when closing and reopening the quickfix
+  window (:cclose | copen), because a new scratch buffer is used, but the
+  autocmd BufRead quickfix has been cleared.
 
 1.21	23-Sep-2013
 - Add :NextUnlessSpellError and :NextOrSpellCheck auxiliary commands.
