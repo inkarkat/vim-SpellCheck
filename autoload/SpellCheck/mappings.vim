@@ -10,6 +10,10 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.30.007	22-Jul-2014	Rework s:InsertMessage() to deal with
+"				potentially appended error contexts.
+"				Simplify s:UndoCorrectedQuickfixEntry() by also
+"				using s:QuickfixInsertMessage().
 "   1.21.006	14-Jun-2013	Minor: Make substitute() robust against
 "				'ignorecase'.
 "   1.21.005	21-Feb-2013	Move to ingo-library.
@@ -107,12 +111,14 @@ endfunction
 function! s:InsertMessage( entry, statusMessage )
     let l:entry = a:entry
     if a:statusMessage =~# '\<undo '
+	" Instead of turning "[good]" into "[undo good]", clear the entire
+	" message.
 	let l:entry = substitute(l:entry, '\C\V' . printf(' [%s]\%($\|\ze\t\t\)', escape(substitute(a:statusMessage, '\Cundo ', '', ''), '\')), '', '')
     endif
     if l:entry ==# a:entry
-	let l:entry = substitute(l:entry, '| \k\+\%( (\d\+)\)\?\zs\%($\|\ze\t\t\)', escape(printf(' [%s]', a:statusMessage), ''), '\')
+	" Replace existing / append new status message.
+	let l:entry = substitute(l:entry, '| \k\+\%( (\d\+)\)\?\zs\%( \[[^]]\+\]\)\?\%($\|\ze\t\t\)', (empty(a:statusMessage) ? '' : escape(printf(' [%s]', a:statusMessage), '\')), '')
     endif
-
     return l:entry
 endfunction
 function! s:QuickfixSetline( lnum, text )
@@ -164,9 +170,8 @@ function! s:QuickfixInsertCorrectionMessage()
     call s:QuickfixInsertMessage(line('.'), 'corrected' . (empty(l:changedText) ? '' : ': ' . l:changedText))
 endfunction
 function! s:UndoCorrectedQuickfixEntry( lnum )
-    let l:correctionMessgePattern = ' \[corrected: .*]\%($\|\ze\t\t\)'
-    if getline(a:lnum) =~# l:correctionMessgePattern
-	call s:QuickfixSetline(a:lnum, substitute(getline(a:lnum), l:correctionMessgePattern, '', ''))
+    if getline(a:lnum) =~# ' \[corrected: .*]\%($\|\ze\t\t\)'
+	call s:QuickfixInsertMessage(a:lnum, '')
 	return 1
     endif
     return 0
