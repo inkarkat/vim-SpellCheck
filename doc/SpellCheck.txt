@@ -38,7 +38,9 @@ embarrassing typos any more!
 ==============================================================================
 USAGE							    *SpellCheck-usage*
 						  *:SpellCheck* *:SpellLCheck*
-:[range]SpellCheck[!]	Show all spelling errors as a quickfix list.
+:[range]SpellCheck[!] [bad | rare | local | caps] [...]
+			Show all / the passed type(s) of spelling errors as a
+			quickfix list.
 			For multiple occurrences of the same error, the first
 			location and the number of occurrences is shown.
 			If [!] is not given the first error is jumped to.
@@ -48,7 +50,8 @@ USAGE							    *SpellCheck-usage*
 			    :argdo SpellCheck
 <			to gather the spelling errors from multiple buffers.
 
-:[range]SpellLCheck[!]	Same as :SpellCheck, except the location list for the
+:[range]SpellLCheck[!] [bad | rare | local | caps] [...]
+			Same as :SpellCheck, except the location list for the
 			current window is used instead of the quickfix list.
 
 MAPPINGS						 *SpellCheck-mappings*
@@ -74,18 +77,20 @@ in the buffer or passed [range] of lines.
 
 			   *:BDeleteUnlessSpellError* *:WriteUnlessSpellError*
 		       *:WriteDeleteUnlessSpellError*   *:XitUnlessSpellError*
-:BDeleteUnlessSpellError[!]	|:bdelete| the current buffer, unless it
+:BDeleteUnlessSpellError[!] [bad | rare | local | caps] [...]
+				:bdelete| the current buffer, unless it
 				contains spelling errors.
-:WriteUnlessSpellError[!] [++opt] [file]
+:WriteUnlessSpellError[!] [bad | rare | local | caps] [...]
 				|:write| the current buffer, unless it
 				contains spelling errors.
-:WriteDeleteUnlessSpellError[!]  [++opt] [file]
+:WriteDeleteUnlessSpellError[!]  [bad | rare | local | caps] [...]
 				|:write| and |:bdelete| the current buffer,
 				unless it contains spelling errors.
-:XitUnlessSpellError[!]		|:write|  the current buffer and |:quit|,
+:XitUnlessSpellError[!] [bad | rare | local | caps] [...]
+				|:write|  the current buffer and |:quit|,
 				unless it contains spelling errors.
 						       *:NextUnlessSpellError*
-:NextUnlessSpellError[!] [++opt] [file]
+:NextUnlessSpellError[!] [bad | rare | local | caps] [...]
 				Edit |:next| file, unless the current buffer
 				contains spelling errors.
 
@@ -93,24 +98,27 @@ This set of commands automatically opens the quickfix list in case of spelling
 error in the buffer or passed [range] of lines.
 				   *:BDeleteOrSpellCheck* *:WriteOrSpellCheck*
 			       *:WriteDeleteOrSpellCheck*   *:XitOrSpellCheck*
-:BDeleteOrSpellCheck[!]		|:bdelete| the current buffer, or show the
+:BDeleteOrSpellCheck[!] [bad | rare | local | caps] [...]
+				|:bdelete| the current buffer, or show the
 				spelling errors in the quickfix list.
-:WriteOrSpellCheck[!] [++opt] [file]
+:WriteOrSpellCheck[!] [bad | rare | local | caps] [...]
 				|:write| the current buffer, or show the
 				spelling errors in the quickfix list.
-:WriteDeleteOrSpellCheck[!] [++opt] [file]
+:WriteDeleteOrSpellCheck[!] [bad | rare | local | caps] [...]
 				|:write| and |:bdelete| the current buffer,
 				or show the spelling errors in the quickfix
 				list.
-:XitOrSpellCheck[!]		|:write| the current buffer and |:quit|, or
+:XitOrSpellCheck[!] [bad | rare | local | caps] [...]
+				|:write| the current buffer and |:quit|, or
 				show the spelling errors in the quickfix list.
 							   *:NextOrSpellCheck*
-:NextOrSpellCheck[!] [++opt] [file]
+:NextOrSpellCheck[!] [bad | rare | local | caps] [...]
 				Edit |:next| file, or show the current
 				buffer's spelling errors in the quickfix list.
 
 							*:UpdateAndSpellCheck*
-:UpdateAndSpellCheck[!]		|:update| the current buffer, and show any
+:UpdateAndSpellCheck[!] [bad | rare | local | caps] [...]
+				|:update| the current buffer, and show any
 				spelling errors in the quickfix list.
 
 				A [!] is passed to the |:write| / |:bdelete| /
@@ -169,7 +177,14 @@ separately.
 The plugin can provide additional syntax highlighting for the quickfix window
 when it contains spell errors; to turn this off, use: >
     let g:SpellCheck_QuickfixHighlight = 0
-<							   *SpellCheck-colors*
+<
+					   *g:SpellCheck_ConsideredErrorTypes*
+To ignore some (e.g. rare) spell errors from the checks, you can define a
+List of considered types; these are overwritten by any [bad | rare | local |
+caps] argument(s) given to individual commands: >
+    let g:SpellCheck_ConsideredErrorTypes = ['bad', 'local', 'caps']
+<
+							   *SpellCheck-colors*
 To change the highlighting colors, redefine (after any |:colorscheme| command)
 or link the two highlight groups: >
     highlight link qfSpellErrorWord             SpellBad
@@ -203,6 +218,20 @@ IDEAS							    *SpellCheck-ideas*
 
 ==============================================================================
 HISTORY							  *SpellCheck-history*
+
+1.40	RELEASEME
+- ENH: Make all commands take optional [bad | rare | local | caps] type
+  argument (the forwarded [++opt] [file] accepted by some auxiliary commands
+  probably aren't very important here) and use that for limiting the checks to
+  those spell error types.
+- Introduce g:SpellCheck_ConsideredErrorTypes configuration variable to limit
+  the error types by default.
+- Go to the first misspelling in the passed range (if any) instead of the
+  first overall. I think this is more DWIM.
+- Set the quickfix type to the capitalized first letter of the spell error
+  type, except for the default "bad" ones. This allows for better
+  differentiation than the previous lumping of rare + local as warning vs.
+  errors.
 
 1.30	24-Jul-2014
 - ENH: Show words surrounding the spell error. The number of captured
@@ -255,7 +284,7 @@ First published version.
 Started development.
 
 ==============================================================================
-Copyright: (C) 2011-2014 Ingo Karkat
+Copyright: (C) 2011-2015 Ingo Karkat
 The VIM LICENSE applies to this plugin; see |copyright|.
 
 Maintainer:	Ingo Karkat <ingo@karkat.de>
