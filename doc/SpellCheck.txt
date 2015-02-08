@@ -204,7 +204,7 @@ IDEAS							    *SpellCheck-ideas*
 ==============================================================================
 HISTORY							  *SpellCheck-history*
 
-1.30	RELEASEME
+1.30	24-Jul-2014
 - ENH: Show words surrounding the spell error. The number of captured
   occurrences is controlled by g:SpellCheck_ErrorContextNum, what gets
   captured by g:SpellCheck_ErrorContextPattern. Thanks to Enno Nagel for the
