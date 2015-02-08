@@ -1,9 +1,9 @@
 " SpellCheck/quickfix.vim: Show all spelling errors as a quickfix list.
 "
 " DEPENDENCIES:
-"   - SpellCheck.vim autoload script.
+"   - SpellCheck.vim autoload script
 "
-" Copyright: (C) 2011-2014 Ingo Karkat
+" Copyright: (C) 2011-2015 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
@@ -30,7 +30,8 @@ endfunction
 function! s:GetErrorContext( lnum, col )
     return matchstr(getline(a:lnum), printf(g:SpellCheck_ErrorContextPattern, '\%' . a:col . 'c'))
 endfunction
-function! s:RetrieveSpellErrors( firstLine, lastLine )
+function! s:RetrieveSpellErrors( firstLine, lastLine, types )
+    let l:types = SpellCheck#GetTypes(a:types)
     let l:spellErrorInfo = {}
     let l:spellErrorList = []
     call cursor(a:firstLine, 1)
@@ -45,22 +46,24 @@ function! s:RetrieveSpellErrors( firstLine, lastLine )
 	    endif
 	endif
 
-	let [l:lnum, l:col] = getpos('.')[1:2]
-	if has_key(l:spellErrorInfo, l:spellBadWord)
-	    let l:entry = l:spellErrorInfo[l:spellBadWord]
-	    let l:entry.count += 1
-	    if len(l:entry.context) < g:SpellCheck_ErrorContextNum
-		call ingo#collections#unique#AddNew(l:entry.context, s:GetErrorContext(l:lnum, l:col))
+	if empty(l:types) || has_key(l:types, l:errorType)
+	    let [l:lnum, l:col] = getpos('.')[1:2]
+	    if has_key(l:spellErrorInfo, l:spellBadWord)
+		let l:entry = l:spellErrorInfo[l:spellBadWord]
+		let l:entry.count += 1
+		if len(l:entry.context) < g:SpellCheck_ErrorContextNum
+		    call ingo#collections#unique#AddNew(l:entry.context, s:GetErrorContext(l:lnum, l:col))
+		endif
+	    else
+		let l:spellErrorInfo[l:spellBadWord] = {
+	    \	    'type': l:errorType,
+	    \	    'lnum': l:lnum,
+	    \	    'col': l:col,
+	    \	    'count': 1,
+	    \	    'context': (g:SpellCheck_ErrorContextNum > 0 ? [s:GetErrorContext(l:lnum, l:col)] : [])
+		\}
+		call add(l:spellErrorList, l:spellBadWord)
 	    endif
-	else
-	    let l:spellErrorInfo[l:spellBadWord] = {
-	    \   'type': l:errorType,
-	    \   'lnum': l:lnum,
-	    \   'col': l:col,
-	    \   'count': 1,
-	    \   'context': (g:SpellCheck_ErrorContextNum > 0 ? [s:GetErrorContext(l:lnum, l:col)] : [])
-	    \}
-	    call add(l:spellErrorList, l:spellBadWord)
 	endif
 
 	let l:colAfterBadWord = col('.') + len(l:spellBadWord)
@@ -119,13 +122,13 @@ function! s:FillQuickfixList( bufnr, spellErrorList, spellErrorInfo, isNoJump, i
     silent execute 'doautocmd QuickFixCmdPost' (a:isUseLocationList ? 'lspell' : 'spell') | " Allow hooking into the quickfix update.
 endfunction
 
-function! SpellCheck#quickfix#List( firstLine, lastLine, isNoJump, isUseLocationList )
+function! SpellCheck#quickfix#List( firstLine, lastLine, isNoJump, isUseLocationList, types )
     if ! SpellCheck#CheckEnabledSpelling()
 	return 2
     endif
 
     let l:save_view = winsaveview()
-	let [l:spellErrorList, l:spellErrorInfo] = s:RetrieveSpellErrors(a:firstLine, a:lastLine)
+	let [l:spellErrorList, l:spellErrorInfo] = s:RetrieveSpellErrors(a:firstLine, a:lastLine, a:types)
     call winrestview(l:save_view)
 
     call s:FillQuickfixList(bufnr(''), l:spellErrorList, l:spellErrorInfo, a:isNoJump, a:isUseLocationList)
