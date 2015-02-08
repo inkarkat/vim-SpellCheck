@@ -84,7 +84,7 @@ endfunction
 function! s:GotoNextSpellError()
     let l:save_wrapscan = &wrapscan
     set nowrapscan
-	silent! normal! ]s
+	silent! keepjumps normal! ]s
     let &wrapscan = l:save_wrapscan
 endfunction
 function! s:GotoFirstMisspelling()
@@ -102,6 +102,7 @@ function! SpellCheck#CheckErrors( firstLine, lastLine, isNoJump, types )
     let l:types = SpellCheck#GetTypes(a:types)
     let l:save_view = winsaveview()
 	let l:isError = 0
+	let l:isFirst = 1
 	call cursor(a:firstLine, 1)
 	while 1
 	    let l:currentPos = getpos('.')
@@ -111,7 +112,7 @@ function! SpellCheck#CheckErrors( firstLine, lastLine, isNoJump, types )
 		" The next spell error lies outside the passed range.
 	    elseif getpos('.') != l:currentPos
 		let l:isError = 1
-	    else
+	    elseif l:isFirst
 		" Either there are no spelling errors at all, or we're on the sole
 		" spelling error in the buffer.
 		let l:isError = ! empty(spellbadword()[0])
@@ -121,6 +122,8 @@ function! SpellCheck#CheckErrors( firstLine, lastLine, isNoJump, types )
 		let [l:spellBadWord, l:errorType] = spellbadword()
 		if ! has_key(l:types, l:errorType)
 		    " This is an ignored type of error, keep searching.
+		    let l:isError = 0
+		    let l:isFirst = 0
 		    continue
 		endif
 	    endif
