@@ -138,7 +138,7 @@ To uninstall, use the |:RmVimball| command.
 DEPENDENCIES					     *SpellCheck-dependencies*
 
 - Requires Vim 7.0 or higher.
-- Requires the |ingo-library.vim| plugin (vimscript #4433), version 1.001 or
+- Requires the |ingo-library.vim| plugin (vimscript #4433), version 1.005 or
   higher.
 
 ==============================================================================
@@ -178,7 +178,7 @@ The plugin can provide additional syntax highlighting for the quickfix window
 when it contains spell errors; to turn this off, use: >
     let g:SpellCheck_QuickfixHighlight = 0
 <
-					   *g:SpellCheck_ConsideredErrorTypes*
+       *b:SpellCheck_ConsideredErrorTypes* *g:SpellCheck_ConsideredErrorTypes*
 To ignore some (e.g. rare) spell errors from the checks, you can define a
 List of considered types; these are overwritten by any [bad | rare | local |
 caps] argument(s) given to individual commands: >
@@ -232,6 +232,7 @@ HISTORY							  *SpellCheck-history*
   type, except for the default "bad" ones. This allows for better
   differentiation than the previous lumping of rare + local as warning vs.
   errors.
+  *** You need to update to ingo-library (vimscript #4433) version 1.005! ***
 
 1.30	24-Jul-2014
 - ENH: Show words surrounding the spell error. The number of captured
