@@ -2,6 +2,7 @@
 "
 " DEPENDENCIES:
 "   - SpellCheck.vim autoload script
+"   - ingo/collections/unique.vim autoload script
 "
 " Copyright: (C) 2011-2015 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
@@ -9,6 +10,15 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
+"   1.40.007	09-Feb-2015	Make SpellCheck#quickfix#List() take an
+"				additional a:types argument to support filtering
+"				for certain spell error types.
+"				Delegate to SpellCheck#NoErrorsFoundMessage().
+"				Set the quickfix type to the capitalized first
+"				letter of the spell error type, except for the
+"				default "bad" ones. This allows for better
+"				differentiation than the previous lumping of
+"				rare + local as warning vs. errors.
 "   1.30.006	22-Jul-2014	ENH: Gather (if configured) error context(s) and
 "				append to the quickfix entry.
 "   1.12.005	01-May-2012	ENH: Allow [range] for :SpellCheck command.
@@ -31,7 +41,6 @@ function! s:GetErrorContext( lnum, col )
     return matchstr(getline(a:lnum), printf(g:SpellCheck_ErrorContextPattern, '\%' . a:col . 'c'))
 endfunction
 function! s:RetrieveSpellErrors( firstLine, lastLine, types )
-    let l:types = SpellCheck#GetTypes(a:types)
     let l:spellErrorInfo = {}
     let l:spellErrorList = []
     call cursor(a:firstLine, 1)
@@ -46,7 +55,7 @@ function! s:RetrieveSpellErrors( firstLine, lastLine, types )
 	    endif
 	endif
 
-	if empty(l:types) || has_key(l:types, l:errorType)
+	if empty(a:types) || has_key(a:types, l:errorType)
 	    let [l:lnum, l:col] = getpos('.')[1:2]
 	    if has_key(l:spellErrorInfo, l:spellBadWord)
 		let l:entry = l:spellErrorInfo[l:spellBadWord]
@@ -82,7 +91,7 @@ function! s:ToQfEntry( error, bufnr, spellErrorInfo )
     let l:entry.text = a:error .
     \   (l:entry.count > 1 ? ' (' . l:entry.count . ')' : '') .
     \   (empty(l:entry.context) ? '' : "\t\t" . join(l:entry.context, ', '))
-    let l:entry.type = (l:entry.type ==# 'bad' || l:entry.type ==# 'caps' ? '' : 'W')
+    let l:entry.type = (l:entry.type ==# 'bad' ? '' : toupper(l:entry.type[0]))
     return l:entry
 endfunction
 function! s:FillQuickfixList( bufnr, spellErrorList, spellErrorInfo, isNoJump, isUseLocationList )
@@ -127,13 +136,14 @@ function! SpellCheck#quickfix#List( firstLine, lastLine, isNoJump, isUseLocation
 	return 2
     endif
 
+    let l:types = SpellCheck#GetTypes(a:types)
     let l:save_view = winsaveview()
-	let [l:spellErrorList, l:spellErrorInfo] = s:RetrieveSpellErrors(a:firstLine, a:lastLine, a:types)
+	let [l:spellErrorList, l:spellErrorInfo] = s:RetrieveSpellErrors(a:firstLine, a:lastLine, l:types)
     call winrestview(l:save_view)
 
     call s:FillQuickfixList(bufnr(''), l:spellErrorList, l:spellErrorInfo, a:isNoJump, a:isUseLocationList)
     if len(l:spellErrorList) == 0
-	echomsg 'No spell errors found'
+	call SpellCheck#NoErrorsFoundMessage(l:types)
     endif
 
     return (len(l:spellErrorList) > 0)
