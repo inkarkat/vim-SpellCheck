@@ -2,6 +2,7 @@
 "
 " DEPENDENCIES:
 "   - ingo/msg.vim autoload script
+"   - ingo/plugin/setting.vim autoload script
 "
 " Copyright: (C) 2011-2015 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
@@ -38,7 +39,7 @@ set cpo&vim
 
 function! SpellCheck#GetTypes( types )
     return ingo#collections#ToDict(empty(a:types) ?
-    \   g:SpellCheck_ConsideredErrorTypes :
+    \   ingo#plugin#setting#GetBufferLocal('SpellCheck_ConsideredErrorTypes') :
     \   split(a:types)
     \)
 endfunction
