@@ -38,9 +38,10 @@ embarrassing typos any more!
 ==============================================================================
 USAGE							    *SpellCheck-usage*
 						  *:SpellCheck* *:SpellLCheck*
-:[range]SpellCheck[!] [bad | rare | local | caps] [...]
+:[range]SpellCheck[!] [bad | rare | local | caps] [...] [{predicates}]
 			Show all / the passed type(s) of spelling errors as a
-			quickfix list.
+			quickfix list [at locations where {predicates} yield
+			true] |SpellCheck-predicates|.
 			For multiple occurrences of the same error, the first
 			location and the number of occurrences is shown.
 			If [!] is not given the first error is jumped to.
@@ -50,10 +51,24 @@ USAGE							    *SpellCheck-usage*
 			    :argdo SpellCheck
 <			to gather the spelling errors from multiple buffers.
 
-:[range]SpellLCheck[!] [bad | rare | local | caps] [...]
+:[range]SpellLCheck[!] [bad | rare | local | caps] [...] [{predicates}]
 			Same as :SpellCheck, except the location list for the
 			current window is used instead of the quickfix list.
 
+						       *SpellCheck-predicates*
+You can pass arbitrary Vimscript expressions that then need to match at the
+current spell error location to consider the spelling error; else, that
+particular error will be ignored. For example, the following will ignore spell
+errors in a Vim modeline: >
+    :SpellCheck getline('.') !~ 'vim:'
+If you define the following syntactic sugar function (in your |vimrc|) >
+    function! Syntax( pattern )
+	return ingo#syntaxitem#IsOnSyntax(getpos('.'), a:pattern)
+    endfunction
+you can easily limit spell checking to certain syntax elements, e.g. to
+exclude spell errors inside comments: >
+    :SpellCheck !Syntax('Comment')
+<
 MAPPINGS						 *SpellCheck-mappings*
 			Inside the quickfix window, the following mappings are
 			remapped so that they operate on the target spell
@@ -77,20 +92,20 @@ in the buffer or passed [range] of lines.
 
 			   *:BDeleteUnlessSpellError* *:WriteUnlessSpellError*
 		       *:WriteDeleteUnlessSpellError*   *:XitUnlessSpellError*
-:BDeleteUnlessSpellError[!] [bad | rare | local | caps] [...]
+:BDeleteUnlessSpellError[!] [bad | rare | local | caps] [...] [{predicates}]
 				:bdelete| the current buffer, unless it
 				contains spelling errors.
-:WriteUnlessSpellError[!] [bad | rare | local | caps] [...]
+:WriteUnlessSpellError[!] [bad | rare | local | caps] [...] [{predicates}]
 				|:write| the current buffer, unless it
 				contains spelling errors.
-:WriteDeleteUnlessSpellError[!]  [bad | rare | local | caps] [...]
+:WriteDeleteUnlessSpellError[!]  [bad | rare | local | caps] [...] [{predicates}]
 				|:write| and |:bdelete| the current buffer,
 				unless it contains spelling errors.
-:XitUnlessSpellError[!] [bad | rare | local | caps] [...]
+:XitUnlessSpellError[!] [bad | rare | local | caps] [...] [{predicates}]
 				|:write|  the current buffer and |:quit|,
 				unless it contains spelling errors.
 						       *:NextUnlessSpellError*
-:NextUnlessSpellError[!] [bad | rare | local | caps] [...]
+:NextUnlessSpellError[!] [bad | rare | local | caps] [...] [{predicates}]
 				Edit |:next| file, unless the current buffer
 				contains spelling errors.
 
@@ -98,26 +113,26 @@ This set of commands automatically opens the quickfix list in case of spelling
 error in the buffer or passed [range] of lines.
 				   *:BDeleteOrSpellCheck* *:WriteOrSpellCheck*
 			       *:WriteDeleteOrSpellCheck*   *:XitOrSpellCheck*
-:BDeleteOrSpellCheck[!] [bad | rare | local | caps] [...]
+:BDeleteOrSpellCheck[!] [bad | rare | local | caps] [...] [{predicates}]
 				|:bdelete| the current buffer, or show the
 				spelling errors in the quickfix list.
-:WriteOrSpellCheck[!] [bad | rare | local | caps] [...]
+:WriteOrSpellCheck[!] [bad | rare | local | caps] [...] [{predicates}]
 				|:write| the current buffer, or show the
 				spelling errors in the quickfix list.
-:WriteDeleteOrSpellCheck[!] [bad | rare | local | caps] [...]
+:WriteDeleteOrSpellCheck[!] [bad | rare | local | caps] [...] [{predicates}]
 				|:write| and |:bdelete| the current buffer,
 				or show the spelling errors in the quickfix
 				list.
-:XitOrSpellCheck[!] [bad | rare | local | caps] [...]
+:XitOrSpellCheck[!] [bad | rare | local | caps] [...] [{predicates}]
 				|:write| the current buffer and |:quit|, or
 				show the spelling errors in the quickfix list.
 							   *:NextOrSpellCheck*
-:NextOrSpellCheck[!] [bad | rare | local | caps] [...]
+:NextOrSpellCheck[!] [bad | rare | local | caps] [...] [{predicates}]
 				Edit |:next| file, or show the current
 				buffer's spelling errors in the quickfix list.
 
 							*:UpdateAndSpellCheck*
-:UpdateAndSpellCheck[!] [bad | rare | local | caps] [...]
+:UpdateAndSpellCheck[!] [bad | rare | local | caps] [...] [{predicates}]
 				|:update| the current buffer, and show any
 				spelling errors in the quickfix list.
 
@@ -219,11 +234,13 @@ IDEAS							    *SpellCheck-ideas*
 ==============================================================================
 HISTORY							  *SpellCheck-history*
 
-1.40	RELEASEME
+2.00	RELEASEME
 - ENH: Make all commands take optional [bad | rare | local | caps] type
   argument (the forwarded [++opt] [file] accepted by some auxiliary commands
   probably aren't very important here) and use that for limiting the checks to
   those spell error types.
+- ENH Make all commands take optional predicates that limit the checked
+  locations, e.g. to text within a certain syntax group only.
 - Introduce g:SpellCheck_ConsideredErrorTypes configuration variable to limit
   the error types by default.
 - Go to the first misspelling in the passed range (if any) instead of the
