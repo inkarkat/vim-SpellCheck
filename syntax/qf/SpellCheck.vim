@@ -16,7 +16,8 @@ endif
 
 if exists('+regexpengine') " {{{2
     " XXX: The new NFA-based regexp engine has a problem with the /\@<= pattern
-    " in combination with a back reference \1; cp. TODO
+    " in combination with a back reference \1; cp.
+    " http://article.gmane.org/gmane.editors.vim.devel/46596
     let s:regexpPrefix = '\%#=1'
 else
     let s:regexpPrefix = ''
