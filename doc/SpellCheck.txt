@@ -198,6 +198,10 @@ To ignore some (e.g. rare) spell errors from the checks, you can define a
 List of considered types; these are overwritten by any [bad | rare | local |
 caps] argument(s) given to individual commands: >
     let g:SpellCheck_ConsideredErrorTypes = ['bad', 'local', 'caps']
+<			   *b:SpellCheck_Predicates* *g:SpellCheck_Predicates*
+Likewise, you can specify default predicates that limit the accepted spell
+errors unless any predicates are passed to the individual command: >
+    let g:SpellCheck_Predicates = 'getline(".") !~ "^#"'
 <
 							   *SpellCheck-colors*
 To change the highlighting colors, redefine (after any |:colorscheme| command)
