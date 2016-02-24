@@ -2,4 +2,5 @@ autoload/SpellCheck.vim
 autoload/SpellCheck/mappings.vim
 autoload/SpellCheck/quickfix.vim
 plugin/SpellCheck.vim
+syntax/qf/SpellCheck.vim
 doc/SpellCheck.txt
