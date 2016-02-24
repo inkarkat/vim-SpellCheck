@@ -84,7 +84,7 @@ function! SpellCheck#mappings#SpellRepeat()
 	set report=0
 
 	spellrepall
-    catch /^Vim\%((\a\+)\)\=:E75[23]/  " E752: No previous spell replacement; E753: Not found: ...
+    catch /^Vim\%((\a\+)\)\=:E75[23]:/  " E752: No previous spell replacement; E753: Not found: ...
 	" Silently ignore the fact that the misspelled word didn't occur
 	" elsewhere.
     finally
