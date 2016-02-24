@@ -10,7 +10,11 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
-"   1.40.006	09-Feb-2015	Make SpellCheck#CheckErrors() take an additional
+"   2.00.007	10-Feb-2015	ENH: Allow to pass arbitrary predicates after /
+"				instead of spell error types. Extend
+"				SpellCheck#GetTypes() into
+"				SpellCheck#ParseArguments().
+"   2.00.006	09-Feb-2015	Make SpellCheck#CheckErrors() take an additional
 "				a:types argument to support filtering for
 "				certain spell error types. Add loop and iterate
 "				until an corresponding spell error type is
@@ -37,11 +41,32 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
-function! SpellCheck#GetTypes( types )
-    return ingo#collections#ToDict(empty(a:types) ?
-    \   ingo#plugin#setting#GetBufferLocal('SpellCheck_ConsideredErrorTypes') :
-    \   split(a:types)
-    \)
+function! SpellCheck#ParseArguments( arguments )
+    let l:types = []
+    let l:arguments = a:arguments
+    while l:arguments =~# '^\a\+\%(\s\|$\)'
+	let [l:first, l:rest] = matchlist(l:arguments, '^\(\a\+\)\s*\(.*\)$')[1:2]
+	if index(g:SpellCheck_ErrorTypes, l:first) != -1
+	    call add(l:types, l:first)
+	    let l:arguments = l:rest
+	else
+	    break
+	endif
+    endwhile
+
+    return [
+    \   ingo#collections#ToDict(empty(l:types) ?
+    \       ingo#plugin#setting#GetBufferLocal('SpellCheck_ConsideredErrorTypes') :
+    \       l:types
+    \   ),
+    \   (empty(l:arguments) ?
+    \       ingo#plugin#setting#GetBufferLocal('SpellCheck_Predicates') :
+    \       l:arguments
+    \   )
+    \]
+endfunction
+function! SpellCheck#ApplyPredicates( predicates )
+    return empty(a:predicates) || eval(a:predicates)
 endfunction
 
 function! SpellCheck#AutoEnableSpell()
@@ -95,13 +120,14 @@ function! s:GotoFirstMisspelling()
     let &wrapscan = l:save_wrapscan
     normal! zv
 endfunction
-function! SpellCheck#CheckErrors( firstLine, lastLine, isNoJump, types )
+function! SpellCheck#CheckErrors( firstLine, lastLine, isNoJump, arguments )
     if ! SpellCheck#CheckEnabledSpelling()
 	return 2
     endif
 
-    let l:types = SpellCheck#GetTypes(a:types)
+    let [l:types, l:predicates] = SpellCheck#ParseArguments(a:arguments)
     let l:save_view = winsaveview()
+    try
 	let l:isError = 0
 	let l:isFirst = 1
 	call cursor(a:firstLine, 1)
@@ -119,20 +145,35 @@ function! SpellCheck#CheckErrors( firstLine, lastLine, isNoJump, types )
 		let l:isError = ! empty(spellbadword()[0])
 	    endif
 
-	    if l:isError && ! empty(l:types)
-		let [l:spellBadWord, l:errorType] = spellbadword()
-		if ! has_key(l:types, l:errorType)
-		    " This is an ignored type of error, keep searching.
-		    let l:isError = 0
-		    let l:isFirst = 0
-		    continue
+	    if l:isError
+		if empty(l:types)
+		    if ! SpellCheck#ApplyPredicates(l:predicates)
+			" The predicates signal to ignore this error, keep searching.
+			let l:isError = 0
+			let l:isFirst = 0
+			continue
+		    endif
+		else
+		    let [l:spellBadWord, l:errorType] = spellbadword()
+		    if ! has_key(l:types, l:errorType) || ! SpellCheck#ApplyPredicates(l:predicates)
+			" This is an ignored type of error, or it is ignored by
+			" predicates; keep searching.
+			let l:isError = 0
+			let l:isFirst = 0
+			continue
+		    endif
 		endif
 	    endif
 
 	    break
 	endwhile
 	let l:errorPos = getpos('.')
-    call winrestview(l:save_view)
+    catch /^Vim\%((\a\+)\)\=:/
+	call ingo#msg#VimExceptionMsg()
+	return 1
+    finally
+	call winrestview(l:save_view)
+    endtry
 
     if l:isError
 	if ! a:isNoJump
@@ -142,14 +183,17 @@ function! SpellCheck#CheckErrors( firstLine, lastLine, isNoJump, types )
 
 	call ingo#msg#ErrorMsg('There are spelling errors')
     else
-	call SpellCheck#NoErrorsFoundMessage(l:types)
+	call SpellCheck#NoErrorsFoundMessage(l:types, l:predicates)
     endif
 
     return l:isError
 endfunction
 
-function! SpellCheck#NoErrorsFoundMessage( types )
-    call ingo#msg#StatusMsg(printf('No %sspell errors found', (empty(a:types) ? '' : join(sort(keys(a:types)), ' or ') . ' ')))
+function! SpellCheck#NoErrorsFoundMessage( types, predicates )
+    call ingo#msg#StatusMsg(printf('No %sspell errors found%s',
+    \   (empty(a:types) ? '' : join(sort(keys(a:types)), ' or ') . ' '),
+    \   (empty(a:predicates) ? '' : ' where ' . a:predicates)
+    \))
 endfunction
 
 let &cpo = s:save_cpo
