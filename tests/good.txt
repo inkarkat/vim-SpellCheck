@@ -1,0 +1,6 @@
+Die elektronische Lohnsteuerkarte soll helfen, das Steuerrecht zu vereinfachen:
+Bei dem neuen Verfahren muss der Arbeitnehmer nur noch sein Geburtsdatum und
+seine steuerliche Identifikationsnummer angeben, wenn er einen neuen Job beginnt
+- mit diesen Informationen kann der Arbeitgeber dann alle wichtigen
+Lohnsteuer-Informationen elektronisch bei der Finanzverwaltung abrufen. So weit
+die Theorie
