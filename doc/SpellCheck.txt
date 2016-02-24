@@ -153,7 +153,7 @@ To uninstall, use the |:RmVimball| command.
 DEPENDENCIES					     *SpellCheck-dependencies*
 
 - Requires Vim 7.0 or higher.
-- Requires the |ingo-library.vim| plugin (vimscript #4433), version 1.005 or
+- Requires the |ingo-library.vim| plugin (vimscript #4433), version 1.024 or
   higher.
 
 ==============================================================================
@@ -243,7 +243,7 @@ HISTORY							  *SpellCheck-history*
   argument (the forwarded [++opt] [file] accepted by some auxiliary commands
   probably aren't very important here) and use that for limiting the checks to
   those spell error types.
-- ENH Make all commands take optional predicates that limit the checked
+- ENH: Make all commands take optional predicates that limit the checked
   locations, e.g. to text within a certain syntax group only.
 - Introduce g:SpellCheck_ConsideredErrorTypes configuration variable to limit
   the error types by default.
@@ -253,7 +253,7 @@ HISTORY							  *SpellCheck-history*
   type, except for the default "bad" ones. This allows for better
   differentiation than the previous lumping of rare + local as warning vs.
   errors.
-  *** You need to update to ingo-library (vimscript #4433) version 1.005! ***
+  *** You need to update to ingo-library (vimscript #4433) version 1.024! ***
 
 1.30	24-Jul-2014
 - ENH: Show words surrounding the spell error. The number of captured
