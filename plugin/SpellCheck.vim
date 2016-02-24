@@ -12,7 +12,10 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
-"   1.40.010	09-Feb-2015	ENH: Make all commands take optional [bad | rare
+"   2.00.011	10-Feb-2015	Extract g:SpellCheck_ErrorTypes; we need those
+"				in SpellCheck#ParseArguments(), too.
+"				ENH: Add g:SpellCheck_Predicates configuration.
+"   2.00.010	09-Feb-2015	ENH: Make all commands take optional [bad | rare
 "				| local | caps] type argument (the forwarded
 "				[++opt] [file] accepted by some auxiliary
 "				commands probably aren't very important here)
@@ -58,6 +61,11 @@ let g:loaded_SpellCheck = 1
 let s:save_cpo = &cpo
 set cpo&vim
 
+"- constants -------------------------------------------------------------------
+
+let g:SpellCheck_ErrorTypes = ['bad', 'rare', 'local', 'caps']
+
+
 "- configuration ---------------------------------------------------------------
 
 if ! exists('g:SpellCheck_OnNospell')
@@ -100,6 +108,9 @@ endif
 if ! exists('g:SpellCheck_ConsideredErrorTypes')
     let g:SpellCheck_ConsideredErrorTypes = []
 endif
+if ! exists('g:SpellCheck_Predicates')
+    let g:SpellCheck_Predicates = ''
+endif
 
 
 "- mappings --------------------------------------------------------------------
@@ -134,26 +145,26 @@ endif
 
 "- commands --------------------------------------------------------------------
 
-call ingo#plugin#cmdcomplete#MakeFixedListCompleteFunc(['bad', 'rare', 'local', 'caps'], 'SpellCheckCompleteFunc')
+call ingo#plugin#cmdcomplete#MakeFixedListCompleteFunc(g:SpellCheck_ErrorTypes, 'SpellCheckCompleteFunc')
 
 if g:SpellCheck_DefineAuxiliaryCommands
-    command! -bar -bang -range=% -nargs=? -complete=customlist,SpellCheckCompleteFunc BDeleteUnlessSpellError     if ! SpellCheck#CheckErrors(<line1>, <line2>, 0, <q-args>)      | bdelete<bang> | endif
-    command! -bar -bang -range=% -nargs=? -complete=customlist,SpellCheckCompleteFunc WriteUnlessSpellError       if ! SpellCheck#CheckErrors(<line1>, <line2>, 0, <q-args>)      | write<bang> | endif
-    command! -bar -bang -range=% -nargs=? -complete=customlist,SpellCheckCompleteFunc WriteDeleteUnlessSpellError if ! SpellCheck#CheckErrors(<line1>, <line2>, 0, <q-args>)      | write<bang> | bdelete<bang> | endif
-    command! -bar -bang -range=% -nargs=? -complete=customlist,SpellCheckCompleteFunc XitUnlessSpellError         if ! SpellCheck#CheckErrors(<line1>, <line2>, 0, <q-args>)      | write<bang> | quit<bang> | endif
-    command! -bar -bang -range=% -nargs=? -complete=customlist,SpellCheckCompleteFunc NextUnlessSpellError        if ! SpellCheck#CheckErrors(<line1>, <line2>, 0, <q-args>)      | next<bang> | endif
+    command! -bar -bang -range=% -nargs=* -complete=customlist,SpellCheckCompleteFunc BDeleteUnlessSpellError     if ! SpellCheck#CheckErrors(<line1>, <line2>, 0, <q-args>)      | bdelete<bang> | endif
+    command! -bar -bang -range=% -nargs=* -complete=customlist,SpellCheckCompleteFunc WriteUnlessSpellError       if ! SpellCheck#CheckErrors(<line1>, <line2>, 0, <q-args>)      | write<bang> | endif
+    command! -bar -bang -range=% -nargs=* -complete=customlist,SpellCheckCompleteFunc WriteDeleteUnlessSpellError if ! SpellCheck#CheckErrors(<line1>, <line2>, 0, <q-args>)      | write<bang> | bdelete<bang> | endif
+    command! -bar -bang -range=% -nargs=* -complete=customlist,SpellCheckCompleteFunc XitUnlessSpellError         if ! SpellCheck#CheckErrors(<line1>, <line2>, 0, <q-args>)      | write<bang> | quit<bang> | endif
+    command! -bar -bang -range=% -nargs=* -complete=customlist,SpellCheckCompleteFunc NextUnlessSpellError        if ! SpellCheck#CheckErrors(<line1>, <line2>, 0, <q-args>)      | next<bang> | endif
 
-    command! -bar -bang -range=% -nargs=? -complete=customlist,SpellCheckCompleteFunc BDeleteOrSpellCheck         if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0, <q-args>) | bdelete<bang> | endif
-    command! -bar -bang -range=% -nargs=? -complete=customlist,SpellCheckCompleteFunc WriteOrSpellCheck           if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0, <q-args>) | write<bang> | endif
-    command! -bar -bang -range=% -nargs=? -complete=customlist,SpellCheckCompleteFunc WriteDeleteOrSpellCheck     if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0, <q-args>) | write<bang> | bdelete<bang> | endif
-    command! -bar -bang -range=% -nargs=? -complete=customlist,SpellCheckCompleteFunc XitOrSpellCheck             if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0, <q-args>) | write<bang> | quit<bang> | endif
-    command! -bar -bang -range=% -nargs=? -complete=customlist,SpellCheckCompleteFunc NextOrSpellCheck            if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0, <q-args>) | next<bang> | endif
+    command! -bar -bang -range=% -nargs=* -complete=customlist,SpellCheckCompleteFunc BDeleteOrSpellCheck         if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0, <q-args>) | bdelete<bang> | endif
+    command! -bar -bang -range=% -nargs=* -complete=customlist,SpellCheckCompleteFunc WriteOrSpellCheck           if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0, <q-args>) | write<bang> | endif
+    command! -bar -bang -range=% -nargs=* -complete=customlist,SpellCheckCompleteFunc WriteDeleteOrSpellCheck     if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0, <q-args>) | write<bang> | bdelete<bang> | endif
+    command! -bar -bang -range=% -nargs=* -complete=customlist,SpellCheckCompleteFunc XitOrSpellCheck             if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0, <q-args>) | write<bang> | quit<bang> | endif
+    command! -bar -bang -range=% -nargs=* -complete=customlist,SpellCheckCompleteFunc NextOrSpellCheck            if ! SpellCheck#quickfix#List(<line1>, <line2>, 0, 0, <q-args>) | next<bang> | endif
 
-    command! -bar -bang -range=% -nargs=? -complete=customlist,SpellCheckCompleteFunc UpdateAndSpellCheck         update<bang> | call SpellCheck#quickfix#List(<line1>, <line2>, 0, 0, <q-args>)
+    command! -bar -bang -range=% -nargs=* -complete=customlist,SpellCheckCompleteFunc UpdateAndSpellCheck         update<bang> | call SpellCheck#quickfix#List(<line1>, <line2>, 0, 0, <q-args>)
 endif
 
-command! -bar -bang -range=% -nargs=? -complete=customlist,SpellCheckCompleteFunc SpellCheck  call SpellCheck#quickfix#List(<line1>, <line2>, <bang>0, 0, <q-args>)
-command! -bar -bang -range=% -nargs=? -complete=customlist,SpellCheckCompleteFunc SpellLCheck call SpellCheck#quickfix#List(<line1>, <line2>, <bang>0, 1, <q-args>)
+command! -bar -bang -range=% -nargs=* -complete=customlist,SpellCheckCompleteFunc SpellCheck  call SpellCheck#quickfix#List(<line1>, <line2>, <bang>0, 0, <q-args>)
+command! -bar -bang -range=% -nargs=* -complete=customlist,SpellCheckCompleteFunc SpellLCheck call SpellCheck#quickfix#List(<line1>, <line2>, <bang>0, 1, <q-args>)
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
