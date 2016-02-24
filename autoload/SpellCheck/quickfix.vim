@@ -10,7 +10,8 @@
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
 "
 " REVISION	DATE		REMARKS
-"   1.40.007	09-Feb-2015	Make SpellCheck#quickfix#List() take an
+"   2.00.008	10-Feb-2015	ENH: Take both types and predicates.
+"   2.00.007	09-Feb-2015	Make SpellCheck#quickfix#List() take an
 "				additional a:types argument to support filtering
 "				for certain spell error types.
 "				Delegate to SpellCheck#NoErrorsFoundMessage().
@@ -40,7 +41,7 @@ endfunction
 function! s:GetErrorContext( lnum, col )
     return matchstr(getline(a:lnum), printf(g:SpellCheck_ErrorContextPattern, '\%' . a:col . 'c'))
 endfunction
-function! s:RetrieveSpellErrors( firstLine, lastLine, types )
+function! s:RetrieveSpellErrors( firstLine, lastLine, types, predicates )
     let l:spellErrorInfo = {}
     let l:spellErrorList = []
     call cursor(a:firstLine, 1)
@@ -55,7 +56,7 @@ function! s:RetrieveSpellErrors( firstLine, lastLine, types )
 	    endif
 	endif
 
-	if empty(a:types) || has_key(a:types, l:errorType)
+	if (empty(a:types) || has_key(a:types, l:errorType)) && SpellCheck#ApplyPredicates(a:predicates)
 	    let [l:lnum, l:col] = getpos('.')[1:2]
 	    if has_key(l:spellErrorInfo, l:spellBadWord)
 		let l:entry = l:spellErrorInfo[l:spellBadWord]
@@ -131,19 +132,25 @@ function! s:FillQuickfixList( bufnr, spellErrorList, spellErrorInfo, isNoJump, i
     silent execute 'doautocmd QuickFixCmdPost' (a:isUseLocationList ? 'lspell' : 'spell') | " Allow hooking into the quickfix update.
 endfunction
 
-function! SpellCheck#quickfix#List( firstLine, lastLine, isNoJump, isUseLocationList, types )
+function! SpellCheck#quickfix#List( firstLine, lastLine, isNoJump, isUseLocationList, arguments )
     if ! SpellCheck#CheckEnabledSpelling()
 	return 2
     endif
 
-    let l:types = SpellCheck#GetTypes(a:types)
+    let [l:types, l:predicates] = SpellCheck#ParseArguments(a:arguments)
     let l:save_view = winsaveview()
-	let [l:spellErrorList, l:spellErrorInfo] = s:RetrieveSpellErrors(a:firstLine, a:lastLine, l:types)
-    call winrestview(l:save_view)
+    try
+	let [l:spellErrorList, l:spellErrorInfo] = s:RetrieveSpellErrors(a:firstLine, a:lastLine, l:types, l:predicates)
+    catch /^Vim\%((\a\+)\)\=:/
+	call ingo#msg#VimExceptionMsg()
+	return 1
+    finally
+	call winrestview(l:save_view)
+    endtry
 
     call s:FillQuickfixList(bufnr(''), l:spellErrorList, l:spellErrorInfo, a:isNoJump, a:isUseLocationList)
     if len(l:spellErrorList) == 0
-	call SpellCheck#NoErrorsFoundMessage(l:types)
+	call SpellCheck#NoErrorsFoundMessage(l:types, l:predicates)
     endif
 
     return (len(l:spellErrorList) > 0)
