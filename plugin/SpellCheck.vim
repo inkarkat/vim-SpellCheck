@@ -6,52 +6,10 @@
 "   - SpellCheck/quickfix.vim autoload script
 "   - ingo/plugin/cmdcomplete.vim autoload script
 "
-" Copyright: (C) 2011-2015 Ingo Karkat
+" Copyright: (C) 2011-2017 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
-"
-" REVISION	DATE		REMARKS
-"   2.00.011	10-Feb-2015	Extract g:SpellCheck_ErrorTypes; we need those
-"				in SpellCheck#ParseArguments(), too.
-"				ENH: Add g:SpellCheck_Predicates configuration.
-"   2.00.010	09-Feb-2015	ENH: Make all commands take optional [bad | rare
-"				| local | caps] type argument (the forwarded
-"				[++opt] [file] accepted by some auxiliary
-"				commands probably aren't very important here)
-"				and use that for limiting the checks to those
-"				spell error types.
-"				Introduce g:SpellCheck_ConsideredErrorTypes
-"				configuration variable to limit the error types
-"				by default.
-"   1.30.009	23-Jul-2014	Add configuration for highlighting of the error
-"				word and context in the quickfix window.
-"				Introduce additional
-"				g:SpellCheck_SpellWordPattern because spell
-"				checking doesn't exactly use the 'iskeyword'
-"				option, and we have to emulate it.
-"				FIX: Quickfix mappings are gone when closing and
-"				reopening the quickfix window (:cclose | copen),
-"				because a new scratch buffer is used, but the
-"				autocmd BufRead quickfix has been cleared.
-"				Only clear that autocmd when a different
-"				quickfix source is used. (And then also turn off
-"				the plugin's additional syntax highlighting.)
-"   1.30.008	22-Jul-2014	Add configuration for error context.
-"   1.21.007	23-Sep-2013	Add :NextUnlessSpellError and :NextOrSpellCheck
-"				auxiliary commands.
-"				Allow to pass optional [++opt] [file] arguments
-"				to the :Write... commands.
-"   1.20.006	08-May-2012	FIX: Line range is not defined and passed for
-"				:BDeleteOrSpellCheck and other :...OrSpellCheck
-"				commands, resulting in a script error.
-"				ENH: Allow [range] for :BDeleteUnlessSpellError
-"				and other :...UnlessSpellError commands, too.
-"   1.12.005	01-May-2012	ENH: Allow [range] for :SpellCheck command.
-"   1.10.004	30-Apr-2012	Add g:SpellCheck_OnSpellAdd hook.
-"   1.00.003	06-Dec-2011	FIX: Missing :quit in :XitOrSpellCheck.
-"	002	03-Dec-2011	Rename configvar to g:SpellCheck_OnNospell.
-"	001	02-Dec-2011	file creation
 
 " Avoid installing twice or when in unsupported Vim version.
 if exists('g:loaded_SpellCheck') || (v:version < 700)
