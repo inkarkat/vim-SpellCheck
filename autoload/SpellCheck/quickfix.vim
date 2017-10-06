@@ -4,29 +4,10 @@
 "   - SpellCheck.vim autoload script
 "   - ingo/collections/unique.vim autoload script
 "
-" Copyright: (C) 2011-2015 Ingo Karkat
+" Copyright: (C) 2011-2017 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
-"
-" REVISION	DATE		REMARKS
-"   2.00.008	10-Feb-2015	ENH: Take both types and predicates.
-"   2.00.007	09-Feb-2015	Make SpellCheck#quickfix#List() take an
-"				additional a:types argument to support filtering
-"				for certain spell error types.
-"				Delegate to SpellCheck#NoErrorsFoundMessage().
-"				Set the quickfix type to the capitalized first
-"				letter of the spell error type, except for the
-"				default "bad" ones. This allows for better
-"				differentiation than the previous lumping of
-"				rare + local as warning vs. errors.
-"   1.30.006	22-Jul-2014	ENH: Gather (if configured) error context(s) and
-"				append to the quickfix entry.
-"   1.12.005	01-May-2012	ENH: Allow [range] for :SpellCheck command.
-"   1.01.002	06-Dec-2011	ENH: Allow accumulating spelling errors from
-"				multiple buffers (e.g. via :argdo SpellCheck).
-"   1.00.001	06-Dec-2011	Publish.
-"	001	02-Dec-2011	file creation
 let s:save_cpo = &cpo
 set cpo&vim
 

@@ -3,15 +3,10 @@
 " DEPENDENCIES:
 "   - ingo/compat/regexp.vim autoload script
 "
-" Copyright: (C) 2014-2015 Ingo Karkat
+" Copyright: (C) 2014-2017 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
-"
-" REVISION	DATE		REMARKS
-"   2.00.002	20-Feb-2015	Replace explicit regexp engine workaround with
-"				ingo/compat/regexp.vim.
-"	001	23-Jul-2014	file creation
 
 if ! exists('g:SpellCheck_IsQuickfixHighlightActive') || ! g:SpellCheck_IsQuickfixHighlightActive
     finish  " Only apply the syntax additions when the quickfix window actually contains spelling errors, to avoid messing up errors from unrelated sources.

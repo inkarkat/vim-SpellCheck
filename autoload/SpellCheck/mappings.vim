@@ -4,30 +4,10 @@
 "   - SpellCheck.vim autoload script
 "   - ingo/collections.vim autoload script
 "
-" Copyright: (C) 2012-2014 Ingo Karkat
+" Copyright: (C) 2012-2017 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
-"
-" REVISION	DATE		REMARKS
-"   1.30.007	22-Jul-2014	Rework s:InsertMessage() to deal with
-"				potentially appended error contexts.
-"				Simplify s:UndoCorrectedQuickfixEntry() by also
-"				using s:QuickfixInsertMessage().
-"   1.21.006	14-Jun-2013	Minor: Make substitute() robust against
-"				'ignorecase'.
-"   1.21.005	21-Feb-2013	Move to ingo-library.
-"   1.13.004	01-May-2012	ENH: Apply undo to the target buffer to allow a
-"				quick revert of a spell correction.
-"   1.11.003	30-Apr-2012	ENH: Capture corrected text and include in
-"				quickfix status message.
-"   1.10.002	30-Apr-2012	Add quickfix mappings for word list management.
-"				Add indication of spell command's result as a
-"				status message appended to the quickfix list
-"				entry.
-"				Avoid staying in target buffer by temporarily
-"				reducing 'updatetime'.
-"   1.10.001	29-Apr-2012	file creation
 
 function! SpellCheck#mappings#SpellSuggestWrapper( ... )
     let l:addendum = ''
