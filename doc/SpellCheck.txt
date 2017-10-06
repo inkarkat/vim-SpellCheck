@@ -142,10 +142,16 @@ error in the buffer or passed [range] of lines.
 ==============================================================================
 INSTALLATION					     *SpellCheck-installation*
 
-This script is packaged as a |vimball|. If you have the "gunzip" decompressor
-in your PATH, simply edit the *.vmb.gz package in Vim; otherwise, decompress
-the archive first, e.g. using WinZip. Inside Vim, install by sourcing the
-vimball or via the |:UseVimball| command. >
+The code is hosted in a Git repo at
+    https://github.com/inkarkat/vim-SpellCheck
+You can use your favorite plugin manager, or "git clone" into a directory used
+for Vim |packages|. Releases are on the "stable" branch, the latest unstable
+development snapshot on "master".
+
+This script is also packaged as a |vimball|. If you have the "gunzip"
+decompressor in your PATH, simply edit the *.vmb.gz package in Vim; otherwise,
+decompress the archive first, e.g. using WinZip. Inside Vim, install by
+sourcing the vimball or via the |:UseVimball| command. >
     vim SpellCheck*.vmb.gz
     :so %
 To uninstall, use the |:RmVimball| command.
@@ -235,10 +241,15 @@ TODO							     *SpellCheck-todo*
 
 IDEAS							    *SpellCheck-ideas*
 
+CONTRIBUTING					       *SpellCheck-contribute*
+
+Report any bugs, send patches, or suggest features via the issue tracker at
+https://github.com/inkarkat/vim-SpellCheck/issues or email (address below).
+
 ==============================================================================
 HISTORY							  *SpellCheck-history*
 
-2.00	RELEASEME
+2.00	06-Oct-2017
 - ENH: Make all commands take optional [bad | rare | local | caps] type
   argument (the forwarded [++opt] [file] accepted by some auxiliary commands
   probably aren't very important here) and use that for limiting the checks to
@@ -306,7 +317,7 @@ First published version.
 Started development.
 
 ==============================================================================
-Copyright: (C) 2011-2015 Ingo Karkat
+Copyright: (C) 2011-2017 Ingo Karkat
 The VIM LICENSE applies to this plugin; see |copyright|.
 
 Maintainer:	Ingo Karkat <ingo@karkat.de>
