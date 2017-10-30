@@ -148,6 +148,8 @@ To uninstall, use the :RmVimball command.
 - Requires Vim 7.0 or higher.
 - Requires the ingo-library.vim plugin ([vimscript #4433](http://www.vim.org/scripts/script.php?script_id=4433)), version 1.024 or
   higher.
+- repeat.vim ([vimscript #2136](http://www.vim.org/scripts/script.php?script_id=2136)) plugin (optional)
+- visualrepeat.vim ([vimscript #3848](http://www.vim.org/scripts/script.php?script_id=3848)) plugin (optional)
 
 CONFIGURATION
 ------------------------------------------------------------------------------
@@ -236,6 +238,8 @@ HISTORY
 
 ##### 2.01    RELEASEME
 - BUG: [count] of quickfix mappings gets clobbered by :normal.
+- ENH: Employ optional repeat.vim / visualrepeat.vim plugins to allow repeat
+  of quickfix mappings with . command from within the quickfix window.
 
 ##### 2.00    06-Oct-2017
 - ENH: Make all commands take optional [bad | rare | local | caps] type

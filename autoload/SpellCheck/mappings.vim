@@ -3,6 +3,8 @@
 " DEPENDENCIES:
 "   - SpellCheck.vim autoload script
 "   - ingo/collections.vim autoload script
+"   - repeat.vim (vimscript #2136) autoload script (optional)
+"   - visualrepeat.vim (vimscript #3848) plugin (optional)
 "
 " Copyright: (C) 2012-2017 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
@@ -125,6 +127,9 @@ function! SpellCheck#mappings#OnSpellAdd( command, statusMessage )
 
     if ! l:isSuccess || empty(a:statusMessage) | return | endif
     call s:QuickfixInsertMessage(line('.'), a:statusMessage)
+
+    silent! call       repeat#set(a:command, l:count)
+    silent! call visualrepeat#set(a:command, l:count)
 endfunction
 function! s:GetCorrectedText()
     " XXX: Unfortunately, Vim doesn't set the change marks `[ `] on z=, so we
