@@ -118,8 +118,9 @@ function! s:QuickfixInsertMessage( lnum, statusMessage )
     call s:QuickfixSetline(a:lnum, s:InsertMessage(getline(a:lnum), a:statusMessage))
 endfunction
 function! SpellCheck#mappings#OnSpellAdd( command, statusMessage )
+    let l:count = (v:count ? v:count : '')
     execute "normal! \<CR>"
-    let l:isSuccess = call(g:SpellCheck_OnSpellAdd, [(v:count ? v:count : ''), a:command])
+    let l:isSuccess = call(g:SpellCheck_OnSpellAdd, [l:count, a:command])
     wincmd p
 
     if ! l:isSuccess || empty(a:statusMessage) | return | endif

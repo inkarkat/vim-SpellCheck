@@ -234,7 +234,10 @@ https://github.com/inkarkat/vim-SpellCheck/issues or email (address below).
 HISTORY
 ------------------------------------------------------------------------------
 
-##### 2.00    RELEASEME
+##### 2.01    RELEASEME
+- BUG: [count] of quickfix mappings gets clobbered by :normal.
+
+##### 2.00    06-Oct-2017
 - ENH: Make all commands take optional [bad | rare | local | caps] type
   argument (the forwarded [++opt] [file] accepted by some auxiliary commands
   probably aren't very important here) and use that for limiting the checks to
