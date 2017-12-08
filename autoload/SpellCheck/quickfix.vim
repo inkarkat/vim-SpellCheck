@@ -3,6 +3,8 @@
 " DEPENDENCIES:
 "   - SpellCheck.vim autoload script
 "   - ingo/collections/unique.vim autoload script
+"   - ingo/event.vim autoload script
+"   - ingo/msg.vim autoload script
 "
 " Copyright: (C) 2011-2017 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
@@ -79,7 +81,7 @@ endfunction
 function! s:FillQuickfixList( bufnr, spellErrorList, spellErrorInfo, isNoJump, isUseLocationList )
     let l:qflist = map(a:spellErrorList, 's:ToQfEntry(v:val, a:bufnr, a:spellErrorInfo[v:val])')
 
-    silent execute 'doautocmd QuickFixCmdPre' (a:isUseLocationList ? 'lspell' : 'spell') | " Allow hooking into the quickfix update.
+    silent call ingo#event#Trigger('QuickFixCmdPre ' . (a:isUseLocationList ? 'lspell' : 'spell'))  " Allow hooking into the quickfix update.
 
     if a:isUseLocationList
 	let l:list = 'l'
@@ -110,7 +112,7 @@ function! s:FillQuickfixList( bufnr, spellErrorList, spellErrorInfo, isNoJump, i
 	endif
     endif
 
-    silent execute 'doautocmd QuickFixCmdPost' (a:isUseLocationList ? 'lspell' : 'spell') | " Allow hooking into the quickfix update.
+    silent call ingo#event#Trigger('QuickFixCmdPost ' . (a:isUseLocationList ? 'lspell' : 'spell')) " Allow hooking into the quickfix update.
 endfunction
 
 function! SpellCheck#quickfix#List( firstLine, lastLine, isNoJump, isUseLocationList, arguments )
