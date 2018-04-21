@@ -120,6 +120,10 @@ function! SpellCheck#quickfix#List( firstLine, lastLine, isNoJump, isUseLocation
 	return 2
     endif
 
+    if &ft == "qf"
+	return 2
+    endif
+
     let [l:types, l:predicates] = SpellCheck#ParseArguments(a:arguments)
     let l:save_view = winsaveview()
     try
