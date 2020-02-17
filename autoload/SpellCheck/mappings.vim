@@ -1,12 +1,11 @@
 " SpellCheck/mappings.vim: Special quickfix window mappings.
 "
 " DEPENDENCIES:
-"   - SpellCheck.vim autoload script
-"   - ingo/collections.vim autoload script
-"   - repeat.vim (vimscript #2136) autoload script (optional)
+"   - ingo-library.vim plugin
+"   - repeat.vim (vimscript #2136) plugin (optional)
 "   - visualrepeat.vim (vimscript #3848) plugin (optional)
 "
-" Copyright: (C) 2012-2017 Ingo Karkat
+" Copyright: (C) 2012-2020 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>

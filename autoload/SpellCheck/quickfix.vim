@@ -1,10 +1,7 @@
 " SpellCheck/quickfix.vim: Show all spelling errors as a quickfix list.
 "
 " DEPENDENCIES:
-"   - SpellCheck.vim autoload script
-"   - ingo/collections/unique.vim autoload script
-"   - ingo/event.vim autoload script
-"   - ingo/msg.vim autoload script
+"   - ingo-library.vim plugin
 "
 " Copyright: (C) 2011-2020 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
