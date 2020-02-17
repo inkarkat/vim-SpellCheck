@@ -255,6 +255,7 @@ HISTORY							  *SpellCheck-history*
 - BUG: [count] of quickfix mappings gets clobbered by :normal.
 - ENH: Employ optional repeat.vim / visualrepeat.vim plugins to allow repeat
   of quickfix mappings with |.| command from within the quickfix window.
+- Skip spell checking in the quickfix window / location list window itself.
 
 2.00	06-Oct-2017
 - ENH: Make all commands take optional [bad | rare | local | caps] type
@@ -324,7 +325,7 @@ First published version.
 Started development.
 
 ==============================================================================
-Copyright: (C) 2011-2017 Ingo Karkat
+Copyright: (C) 2011-2020 Ingo Karkat
 The VIM LICENSE applies to this plugin; see |copyright|.
 
 Maintainer:	Ingo Karkat <ingo@karkat.de>

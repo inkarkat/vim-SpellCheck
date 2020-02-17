@@ -1,4 +1,4 @@
-SPELL CHECK   
+SPELL CHECK
 ===============================================================================
 _by Ingo Karkat_
 
@@ -39,7 +39,7 @@ USAGE
                             In the quickfix list, spelling errors from other
                             buffers are kept, so you can use something like
                                 :argdo SpellCheck
-                           to gather the spelling errors from multiple buffers.
+                            to gather the spelling errors from multiple buffers.
 
     :[range]SpellLCheck[!] [bad | rare | local | caps] [...] [{predicates}]
                             Same as :SpellCheck, except the location list for the
@@ -240,6 +240,7 @@ HISTORY
 - BUG: [count] of quickfix mappings gets clobbered by :normal.
 - ENH: Employ optional repeat.vim / visualrepeat.vim plugins to allow repeat
   of quickfix mappings with . command from within the quickfix window.
+- Skip spell checking in the quickfix window / location list window itself.
 
 ##### 2.00    06-Oct-2017
 - ENH: Make all commands take optional [bad | rare | local | caps] type
@@ -256,7 +257,8 @@ HISTORY
   type, except for the default "bad" ones. This allows for better
   differentiation than the previous lumping of rare + local as warning vs.
   errors.
-  __You need to update to ingo-library ([vimscript #4433](http://www.vim.org/scripts/script.php?script_id=4433)) version 1.024!__
+
+__You need to update to ingo-library ([vimscript #4433](http://www.vim.org/scripts/script.php?script_id=4433)) version 1.024!__
 
 ##### 1.30    24-Jul-2014
 - ENH: Show words surrounding the spell error. The number of captured
@@ -273,7 +275,9 @@ HISTORY
 ##### 1.21    23-Sep-2013
 - Add :NextUnlessSpellError and :NextOrSpellCheck auxiliary commands.
 - Allow to pass optional [++opt] [file] arguments to the :Write... commands.
-- Add dependency to ingo-library ([vimscript #4433](http://www.vim.org/scripts/script.php?script_id=4433)). __You need to separately
+- Add dependency to ingo-library ([vimscript #4433](http://www.vim.org/scripts/script.php?script_id=4433)).
+
+__You need to separately
   install ingo-library ([vimscript #4433](http://www.vim.org/scripts/script.php?script_id=4433)) version 1.001 (or higher)!__
 
 ##### 1.20    08-May-2012
@@ -309,7 +313,7 @@ SpellCheck).
 - Started development.
 
 ------------------------------------------------------------------------------
-Copyright: (C) 2011-2017 Ingo Karkat -
+Copyright: (C) 2011-2020 Ingo Karkat -
 The [VIM LICENSE](http://vimdoc.sourceforge.net/htmldoc/uganda.html#license) applies to this plugin.
 
-Maintainer:     Ingo Karkat <ingo@karkat.de>
+Maintainer:     Ingo Karkat &lt;ingo@karkat.de&gt;

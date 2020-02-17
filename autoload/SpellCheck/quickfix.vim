@@ -6,7 +6,7 @@
 "   - ingo/event.vim autoload script
 "   - ingo/msg.vim autoload script
 "
-" Copyright: (C) 2011-2017 Ingo Karkat
+" Copyright: (C) 2011-2020 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
@@ -116,7 +116,7 @@ function! s:FillQuickfixList( bufnr, spellErrorList, spellErrorInfo, isNoJump, i
 endfunction
 
 function! SpellCheck#quickfix#List( firstLine, lastLine, isNoJump, isUseLocationList, arguments )
-    if ! SpellCheck#CheckEnabledSpelling()
+    if ingo#window#quickfix#IsQuickfixList(1) == (a:isUseLocationList ? 2 : 1) || ! SpellCheck#CheckEnabledSpelling()
 	return 2
     endif
 
