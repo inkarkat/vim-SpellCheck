@@ -2,11 +2,9 @@
 "
 " DEPENDENCIES:
 "   - Requires Vim 7.0 or higher.
-"   - SpellCheck.vim autoload script
-"   - SpellCheck/quickfix.vim autoload script
-"   - ingo/plugin/cmdcomplete.vim autoload script
+"   - ingo-library.vim plugin
 "
-" Copyright: (C) 2011-2017 Ingo Karkat
+" Copyright: (C) 2011-2020 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>

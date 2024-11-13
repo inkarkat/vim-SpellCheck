@@ -1,10 +1,11 @@
 " SpellCheck/mappings.vim: Special quickfix window mappings.
 "
 " DEPENDENCIES:
-"   - SpellCheck.vim autoload script
-"   - ingo/collections.vim autoload script
+"   - ingo-library.vim plugin
+"   - repeat.vim (vimscript #2136) plugin (optional)
+"   - visualrepeat.vim (vimscript #3848) plugin (optional)
 "
-" Copyright: (C) 2012-2017 Ingo Karkat
+" Copyright: (C) 2012-2020 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
@@ -118,12 +119,16 @@ function! s:QuickfixInsertMessage( lnum, statusMessage )
     call s:QuickfixSetline(a:lnum, s:InsertMessage(getline(a:lnum), a:statusMessage))
 endfunction
 function! SpellCheck#mappings#OnSpellAdd( command, statusMessage )
+    let l:count = (v:count ? v:count : '')
     execute "normal! \<CR>"
-    let l:isSuccess = call(g:SpellCheck_OnSpellAdd, [(v:count ? v:count : ''), a:command])
+    let l:isSuccess = call(g:SpellCheck_OnSpellAdd, [l:count, a:command])
     wincmd p
 
     if ! l:isSuccess || empty(a:statusMessage) | return | endif
     call s:QuickfixInsertMessage(line('.'), a:statusMessage)
+
+    silent! call       repeat#set(a:command, l:count)
+    silent! call visualrepeat#set(a:command, l:count)
 endfunction
 function! s:GetCorrectedText()
     " XXX: Unfortunately, Vim doesn't set the change marks `[ `] on z=, so we

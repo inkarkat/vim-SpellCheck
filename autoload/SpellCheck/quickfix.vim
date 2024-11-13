@@ -1,10 +1,9 @@
 " SpellCheck/quickfix.vim: Show all spelling errors as a quickfix list.
 "
 " DEPENDENCIES:
-"   - SpellCheck.vim autoload script
-"   - ingo/collections/unique.vim autoload script
+"   - ingo-library.vim plugin
 "
-" Copyright: (C) 2011-2017 Ingo Karkat
+" Copyright: (C) 2011-2020 Ingo Karkat
 "   The VIM LICENSE applies to this script; see ':help copyright'.
 "
 " Maintainer:	Ingo Karkat <ingo@karkat.de>
@@ -79,7 +78,9 @@ endfunction
 function! s:FillQuickfixList( bufnr, spellErrorList, spellErrorInfo, isNoJump, isUseLocationList )
     let l:qflist = map(a:spellErrorList, 's:ToQfEntry(v:val, a:bufnr, a:spellErrorInfo[v:val])')
 
-    silent execute 'doautocmd QuickFixCmdPre' (a:isUseLocationList ? 'lspell' : 'spell') | " Allow hooking into the quickfix update.
+    "let l:quickfixType = (a:isUseLocationList ? 2 : 1)
+    "call ingo#window#quickfix#CmdPre(l:quickfixType, '[l]spell')
+    silent call ingo#event#Trigger('QuickFixCmdPre ' . (a:isUseLocationList ? 'lspell' : 'spell'))  " Allow hooking into the quickfix update.
 
     if a:isUseLocationList
 	let l:list = 'l'
@@ -110,11 +111,12 @@ function! s:FillQuickfixList( bufnr, spellErrorList, spellErrorInfo, isNoJump, i
 	endif
     endif
 
-    silent execute 'doautocmd QuickFixCmdPost' (a:isUseLocationList ? 'lspell' : 'spell') | " Allow hooking into the quickfix update.
+    silent call ingo#event#Trigger('QuickFixCmdPost ' . (a:isUseLocationList ? 'lspell' : 'spell')) " Allow hooking into the quickfix update.
+    "call ingo#window#quickfix#CmdPost(l:quickfixType, '[l]spell')
 endfunction
 
 function! SpellCheck#quickfix#List( firstLine, lastLine, isNoJump, isUseLocationList, arguments )
-    if ! SpellCheck#CheckEnabledSpelling()
+    if ingo#window#quickfix#IsQuickfixList(1) == (a:isUseLocationList ? 2 : 1) || ! SpellCheck#CheckEnabledSpelling()
 	return 2
     endif
 
