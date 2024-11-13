@@ -236,7 +236,7 @@ https://github.com/inkarkat/vim-SpellCheck/issues or email (address below).
 HISTORY
 ------------------------------------------------------------------------------
 
-##### 2.01    RELEASEME
+##### 2.01    13-Nov-2024
 - BUG: [count] of quickfix mappings gets clobbered by :normal.
 - ENH: Employ optional repeat.vim / visualrepeat.vim plugins to allow repeat
   of quickfix mappings with . command from within the quickfix window.
@@ -313,7 +313,7 @@ SpellCheck).
 - Started development.
 
 ------------------------------------------------------------------------------
-Copyright: (C) 2011-2020 Ingo Karkat -
+Copyright: (C) 2011-2024 Ingo Karkat -
 The [VIM LICENSE](http://vimdoc.sourceforge.net/htmldoc/uganda.html#license) applies to this plugin.
 
 Maintainer:     Ingo Karkat &lt;ingo@karkat.de&gt;
